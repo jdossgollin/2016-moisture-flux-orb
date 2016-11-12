@@ -20,9 +20,9 @@ tme_ts=processed/tme_ts.rda
 
 $(tme_rda)	:	scripts/GetTME.R config/dates.mk config/paths.mk config/spatial.mk
 	Rscript $< --tmepath=$(tme_path) --syear=$(syear) --eyear=$(eyear) --gridsize=$(gridsize) --lonmin=$(lonmin) --lonmax=$(lonmax) --latmin=$(latmin) --latmax=$(latmax) --outfile=$(tme_rda)
-$(gridded_rda)	:	scripts/GetGriddedTME.R config/spatial.mk
+$(gridded_rda)	:	scripts/GetGriddedTME.R $(tme_rda) config/spatial.mk
 	Rscript $< --rawfile=$(tme_rda) --gridsize=$(gridsize) --outfile=$(gridded_rda)
-$(tme_ts)	:	scripts/GetTMETimeSeries.R config/spatial.mk
+$(tme_ts)	:	scripts/GetTMETimeSeries.R $(gridded_rda) config/spatial.mk
 	Rscript $< --rawfile=$(gridded_rda) --outfile=$(tme_ts) --lonmin=$(lonmin) --lonmax=$(lonmax) --latmin=$(latmin) --latmax=$(latmax)
 
 
