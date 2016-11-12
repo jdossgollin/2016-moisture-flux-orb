@@ -17,6 +17,7 @@ include config/*.mk
 tme_rda=processed/tmev2.rda
 gridded_rda=processed/gridded_tmev2.rda
 tme_ts=processed/tme_ts.rda
+dipole_ts=processed/dipole_ts.rda
 
 $(tme_rda)	:	scripts/GetTME.R config/dates.mk config/paths.mk config/spatial.mk
 	Rscript $< --tmepath=$(tme_path) --syear=$(syear) --eyear=$(eyear) --gridsize=$(gridsize) --lonmin=$(lonmin) --lonmax=$(lonmax) --latmin=$(latmin) --latmax=$(latmax) --outfile=$(tme_rda)
@@ -24,10 +25,13 @@ $(gridded_rda)	:	scripts/GetGriddedTME.R $(tme_rda) config/spatial.mk
 	Rscript $< --rawfile=$(tme_rda) --gridsize=$(gridsize) --outfile=$(gridded_rda)
 $(tme_ts)	:	scripts/GetTMETimeSeries.R $(gridded_rda) config/spatial.mk
 	Rscript $< --rawfile=$(gridded_rda) --outfile=$(tme_ts) --lonmin=$(lonmin) --lonmax=$(lonmax) --latmin=$(latmin) --latmax=$(latmax)
-
+processed/dipole_high.nc processed/dipole_low.nc	:	scripts/download_dipole.py
+	python $<
+$(dipole_ts)	:	scripts/GetDipoleTS.R $(dipole_nc) processed/dipole_high.nc processed/dipole_low.nc
+	Rscript $<  --nchigh="processed/dipole_high.nc" --nclow="processed/dipole_low.nc" --outfile=$(dipole_ts)
 
 ## processed	:	read and analyze data sets
-processed	:	$(tme_rda) $(gridded_rda) $(tme_ts)
+processed	:	$(tme_rda) $(gridded_rda) $(tme_ts) $(dipole_ts)
 
 
 
