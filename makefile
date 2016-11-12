@@ -1,5 +1,5 @@
 ## all	:	run everything
-all	:	dependencies figs
+all	:	dependencies processed figs
 
 # these files contain options for running the code
 
