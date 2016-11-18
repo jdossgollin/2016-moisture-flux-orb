@@ -31,12 +31,11 @@ server.retrieve({
     "date": "%d-01-01/to/%d-12-31" %(syear, eyear),
     "expver": "1",
     "grid": "%f/%f" %(grid, grid),
-    "levelist": "850", # levels to download
-    "levtype": "pl",
-    "param": "129.128", # specifies the what to download (geopotential hgt)
+    "levtype": "sfc",
+    "param": "71.162/72.162",
     "step": "0",
     "stream": "oper",
-    "time": "00:00:00/06:00:00/12:00:00/18:00:00", # Time of Days
+    "time": "00:00:00/06:00:00/12:00:00/18:00:00",
     "type": "an",
     "format": "netcdf", # delete this if for some reason you want GRIB...
     "area": "%f/%f/%f/%f" %(latmax,lonmin,latmin,lonmax), # NORTH/WEST/SOUTH/EAST

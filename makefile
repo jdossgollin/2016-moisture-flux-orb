@@ -13,38 +13,38 @@ dependencies	: scripts/InstallRPackages.R
 # file paths and other options
 include config/*.mk
 
+# How big to make the grids
+GRIDSIZE=1.0
+
 # THE PROCESSED DATA
-tme_rda=processed/tmev2.rda
-gridded_rda=processed/gridded_tmev2.rda
-tme_ts=processed/tme_ts.rda
 dipole_ts=processed/dipole_ts.rda
 pna_rda=processed/pna.rda
+moisture_nc=processed/moisture.nc
+dlow_nc=processed/dipolelow.nc
+dhigh_nc=processed/dipolehigh.nc
 
-$(tme_rda)	:	scripts/GetTME.R config/dates.mk config/paths.mk config/spatial.mk
-	Rscript $< --tmepath=$(tme_path) --syear=$(syear) --eyear=$(eyear) --gridsize=$(gridsize) --lonmin=$(lonmin) --lonmax=$(lonmax) --latmin=$(latmin) --latmax=$(latmax) --outfile=$(tme_rda)
-$(gridded_rda)	:	scripts/GetGriddedTME.R $(tme_rda) config/spatial.mk
-	Rscript $< --rawfile=$(tme_rda) --gridsize=$(gridsize) --outfile=$(gridded_rda)
-$(tme_ts)	:	scripts/GetTMETimeSeries.R $(gridded_rda) config/spatial.mk
-	Rscript $< --rawfile=$(gridded_rda) --outfile=$(tme_ts) --lonmin=$(lonmin) --lonmax=$(lonmax) --latmin=$(latmin) --latmax=$(latmax)
-processed/dipole_high.nc processed/dipole_low.nc	:	scripts/download_dipole.py
-	python $<
-$(dipole_ts)	:	scripts/GetDipoleTS.R $(dipole_nc) processed/dipole_high.nc processed/dipole_low.nc
-	Rscript $<  --nchigh="processed/dipole_high.nc" --nclow="processed/dipole_low.nc" --outfile=$(dipole_ts)
-$(pna_rda)	:	scripts/GetPNA.R config/dates.mk
-	Rscript $< --syear=$(syear) --eyear=$(eyear) --outfile=$(pna_rda)
+$(moisture_nc)	:	scripts/moisture_flux.py config/moisturebox.mk config/dates.mk
+	python3 $< --outfile $(moisture_nc) --bound $(MBNORTH) $(MBWEST) $(MBSOUTH) $(MBEAST) --grid $(GRIDSIZE) --syear $(SYEAR) --eyear $(EYEAR)
+$(dlow_nc)	:	scripts/download_dipole.py config/dipoleLow.mk config/dates.mk
+	python3 $< --outfile $(moisture_nc) --bound $(DLNORTH) $(DLWEST) $(DLSOUTH) $(DLEAST) --grid $(GRIDSIZE) --syear $(SYEAR) --eyear $(EYEAR)
+$(dhigh_nc)	:	scripts/download_dipole.py config/dipoleHigh.mk config/dates.mk
+	python3 $< --outfile $(moisture_nc) --bound $(DHNORTH) $(DHWEST) $(DHSOUTH) $(DHEAST) --grid $(GRIDSIZE) --syear $(SYEAR) --eyear $(EYEAR)
+#$(dipole_ts)	:	scripts/GetDipoleTS.R $(dipole_nc) processed/dipole_high.nc processed/dipole_low.nc
+#	Rscript $<  --nchigh="processed/dipole_high.nc" --nclow="processed/dipole_low.nc" --outfile=$(dipole_ts)
+#$(pna_rda)	:	scripts/GetPNA.R config/dates.mk
+#	Rscript $< --syear=$(syear) --eyear=$(eyear) --outfile=$(pna_rda)
 
 ## processed	:	read and analyze data sets
-processed	:	$(tme_rda) $(gridded_rda) $(tme_ts) $(dipole_ts) $(pna_rda)
+processed	: $(moisture_nc) $(dlow_nc) $(dhigh_nc)
 
 
 
 
 # FIGURES
-figs/tme_plot_*.pdf	:	scripts/PlotRawTME.R
-	Rscript $< --tmepath=$(tme_rda) --gridpath=$(gridded_rda) --tspath=$(tme_ts) --out_path="figs/tme_plot_" --pdf=TRUE
+
 
 ## figs	:	make the plots
-figs	:	figs/tme_plot_*.pdf
+figs	:
 
 ## clean	:	reset to original (only raw data and scripts)
 clean	:
