@@ -37,14 +37,13 @@ reanalysis	: $(moisture_nc) $(dlow_nc) $(dhigh_nc)
 dipole_ts=processed/dipole_ts.rda
 pna_rda=processed/pna.rda
 
-
-#$(dipole_ts)	:	scripts/GetDipoleTS.R $(dipole_nc) processed/dipole_high.nc processed/dipole_low.nc
-#	Rscript $<  --nchigh="processed/dipole_high.nc" --nclow="processed/dipole_low.nc" --outfile=$(dipole_ts)
-#$(pna_rda)	:	scripts/GetPNA.R config/dates.mk
-#	Rscript $< --syear=$(syear) --eyear=$(eyear) --outfile=$(pna_rda)
+$(dipole_ts)	:	scripts/GetDipoleTS.R $(dlow_nc) $(dhigh_nc)
+	Rscript $< --nchigh=$(dhigh_nc) --nclow=$(dlow_nc) --outfile=$(dipole_ts)
+$(pna_rda)	:	scripts/GetPNA.R config/dates.mk
+	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(pna_rda)
 
 ## processed	:	read and analyze data sets
-processed	:  reanalysis
+processed	:  reanalysis $(dipole_ts) $(pna_rda)
 
 
 

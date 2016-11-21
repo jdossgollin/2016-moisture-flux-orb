@@ -26,4 +26,7 @@ pna[, ':='(month = month(date), year = year(date))]
 
 pna <- pna[year >= opt$syear & year <= opt$eyear]
 
+# re-order
+pna <- pna[, .(date, year, month, pna)]
+
 save(pna, file = opt$outfile)
