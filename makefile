@@ -36,16 +36,26 @@ reanalysis	: $(moisture_nc) $(dlow_nc) $(dhigh_nc)
 # THE PROCESSED DATA
 dipole_ts=processed/dipole_ts.rda
 pna_rda=processed/pna.rda
+tme_rda=processed/tme.rda
+tme_grid=processed/tme_gridded.rda
+tme_ts=processed/tme_ts.rda
+moisture_rda=processed/moisture.rda
 
 $(dipole_ts)	:	scripts/GetDipoleTS.R $(dlow_nc) $(dhigh_nc)
 	Rscript $< --nchigh=$(dhigh_nc) --nclow=$(dlow_nc) --outfile=$(dipole_ts)
 $(pna_rda)	:	scripts/GetPNA.R config/dates.mk
 	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(pna_rda)
+$(tme_rda)	:	scripts/GetTME.R config/dates.mk config/moisturebox.mk
+	Rscript $< --tmepath="~/Documents/Work/Data/TMEv2/" --syear=$(SYEAR) --eyear=$(EYEAR) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outfile=$(tme_rda)
+$(tme_grid)	:	scripts/GetGriddedTME.R $(tme_rda)
+	Rscript $< --rawfile=$(tme_rda) --gridsize=$(GRIDSIZE) --outfile=$(tme_grid)
+$(tme_ts)	:	scripts/GetTMETS.R $(tme_grid) config/moisturebox.mk
+	Rscript $< --gridded=$(tme_grid) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outfile=$(tme_ts)
+$(moisture_rda)	:	scripts/ReadMoistureFlux.R $(moisture_nc)
+	Rscript $< --infile=$(moisture_nc) --outfile=$(moisture_rda)
 
 ## processed	:	read and analyze data sets
-processed	:  reanalysis $(dipole_ts) $(pna_rda)
-
-
+processed	:  reanalysis $(dipole_ts) $(pna_rda) $(tme_rda) $(tme_grid) $(tme_ts) $(moisture_rda)
 
 
 # FIGURES

@@ -6,12 +6,14 @@ pacman::p_load(data.table, magrittr, lubridate, ggplot2, ggthemes, optparse, xts
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
 option_list <- list(
-  make_option("--tmepath", type="character", default="processed/tmev2.rda",
-              help="Path TME data [default %default]"),
-  make_option("--gridpath", type="character", default="processed/gridded_tmev2.rda",
-              help="Path to gridded data [default %default]"),
-  make_option("--tspath", type="character", default="processed/tme_ts.rda",
-              help="Path to TME time series [default %default]"),
+  make_option("--tmets", type="character", default="processed/tme_ts.rda",
+              help="TME time series [default %default]"),
+  make_option("--moisture", type="character", default="processed/moisture.rda",
+              help="Moisture flux time series [default %default]"),
+  make_option("--dipole", type="character", default="processed/dipole_ts.rda",
+              help="Dipole index time series [default %default]"),
+  make_option("--pna", type="character", default="processed/pna.rda",
+              help="PNA time series [default %default]"),
   make_option("--out_path", type="character", default="figs/tme_plot_",
               help="Beginning of file names [default %default]"),
   make_option("--pdf", type="logical", default=TRUE,
@@ -21,58 +23,17 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 # -------- Begin Script -------
 
-load(opt$tmepath); load(opt$gridpath); load(opt$tspath)
-world <- map_data('world') %>% as.data.table()
-setnames(world, 'long', 'lon')
+load(opt$tmets); setnames(gridded, 'dQ', 'TME')
+load(opt$moisture); setnames(q_mean, 'dq', 'q_flux')
+load(opt$dipole)
+load(opt$pna)
+dipole[, time := date][, date := as_date(time)]
+dipole <- dipole[, .(dipole = mean(dipole)), by = date]
+q_mean[, date := as_date(time)]
+q_mean <- q_mean[, .(q_flux = mean(q_flux)), by = date]
 
-# PLOT SOME TME TRACKS
-tracks_all <- tme[, unique(traj_id)]
-tracks_random <- sample(tracks_all, 25)
-plot_tracks <- 
-  tme[traj_id %in% tracks_random] %>%
-  ggplot(aes(x=lon, y = lat)) +
-  geom_path(aes(group = traj_id, color = Q)) +
-  geom_path(data = world, aes(group = group)) +
-  scale_color_distiller(palette = "PuBu", direction = 1) +
-  ylim(c(15, 70)) +
-  xlim(c(-140, 0)) +
-  theme_map(base_size = 9) +
-  coord_quickmap()
-plot_tracks %>% EZPrint(fn = paste0(opt$out_path, 'all_seasons'), screen = !opt$pdf, pdf = opt$pdf, width = 8, height = 5)
-
-# PLOT GRIDS
-mean_grid <- gridded[, .(dQ = sum(dQ)), by = .(lon, lat)]
-plot_grid <- 
-  mean_grid %>%
-  ggplot(aes(x= lon, y = lat)) + 
-  geom_raster(aes(fill = dQ))  +
-  geom_path(data = world, aes(group = group)) +
-  scale_fill_gradient2() +
-  ylim(c(15, 70)) +
-  xlim(c(-140, 0)) +
-  theme_map() +
-  coord_quickmap()
-plot_grid %>% EZPrint(fn = paste0(opt$out_path, 'gridded'), screen = !opt$pdf, pdf = opt$pdf, width = 8, height = 5)
-
-# Plot Time Series
-if(opt$pdf) pdf(file = paste0(opt$out_path, 'time series.pdf'), width = 9, height = 6)
-plot(tme_ts, main = "Net TME into ORB", ylab = "Net TME Flux")
-if(opt$pdf) dev.off()
-
-# Tracks by Season
-tracks_random2 <- sample(tracks_all, 200)
-sub_tme <- tme[traj_id %in% tracks_random2]
-sub_tme[, season := JamesR::GetSeasonDate(start_date)]
-plot_tracks_season <- 
-  sub_tme %>%
-  ggplot(aes(x=lon, y = lat)) +
-  geom_path(aes(group = traj_id, color = Q)) +
-  geom_path(data = world, aes(group = group)) +
-  scale_color_distiller(palette = "PuBu", direction = 1) +
-  ylim(c(15, 70)) +
-  xlim(c(-140, 0)) +
-  theme_map() +
-  coord_quickmap() +
-  facet_wrap('season') +
-  theme(legend.position = "bottom")
-plot_tracks_season %>% EZPrint(fn = paste0(opt$out_path, 'track_by_season'), screen = !opt$pdf, pdf = opt$pdf, width = 12, height = 9)
+merged <-merge(merge(pna, q_mean, by = 'date', all = T), merge(dipole, gridded, by = 'date', all = T), by = 'date', all = T)
+drange <- dipole[, range(date)]
+merged <- merged[date >= drange[1] & date <= drange[2]]
+merged[is.na(TME), TME := 0]
+pairs(merged[, -'date', with = F], pch = '.', col = scales::alpha(1, 0.25))

@@ -1,6 +1,6 @@
 # -------- Packages and Options -------
 
-pacman::p_load(data.table, magrittr, ncdf4, lubridate, xts, optparse)
+pacman::p_load(data.table, magrittr, ncdf4, lubridate, optparse)
 pacman::p_load_gh('jdossgollin/JamesR')
 
 # get command line options, if help option encountered print help and exit,
@@ -17,16 +17,19 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 # -------- Begin Script -------
 
-url <- 'http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.Indices/.NHTI/.PNA/gridtable.tsv'
-pna <- fread(url, skip = 1)
-names(pna) <- c('t', 'pna')
-pna[, date := ymd('1960-01-01') + months(floor(t))]
-pna[, t := NULL]
-pna[, ':='(month = month(date), year = year(date))]
+# this data set is very strange
+url <- 'ftp://ftp.cpc.ncep.noaa.gov/cwlinks/norm.daily.pna.index.b500101.current.ascii'
+tmpf <- tempfile()
+download.file(url, destfile = tmpf)
+tx  <- readLines(tmpf)
+tx2  <- gsub(pattern = '*******', replace = " -999", x = tx, fixed = TRUE)
+writeLines(tx2, con=tmpf)
+pna <-  fread(tmpf, na.strings = '-999')
+file.remove(tmpf)
 
+names(pna) <- c('year', 'month', 'day', 'pna')
 pna <- pna[year >= opt$syear & year <= opt$eyear]
-
-# re-order
-pna <- pna[, .(date, year, month, pna)]
+pna[, date := ymd(paste(year, month, day))]
+pna <- pna[, .(date, pna)]
 
 save(pna, file = opt$outfile)

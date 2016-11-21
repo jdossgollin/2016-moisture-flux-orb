@@ -20,8 +20,6 @@ option_list <- list(
               help="First year of data to collect [default %default]"),
   make_option("--lonmax", type="integer", default="-77.5",
               help="Last year of data to collect [default %default]"),
-  make_option("--gridsize", type="double", default="2.5",
-              help="To how many degrees should TME data be gridded [default %default]"),
   make_option("--outfile", type="character", default="processed/gridded_tmev2.rda",
               help="Name of .rda file to store gridded tidy TME tracks  [default %default]")
 )
