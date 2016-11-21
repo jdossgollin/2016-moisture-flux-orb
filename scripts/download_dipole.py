@@ -40,5 +40,5 @@ server.retrieve({
     "type": "an",
     "format": "netcdf", # delete this if for some reason you want GRIB...
     "area": "%f/%f/%f/%f" %(latmax,lonmin,latmin,lonmax), # NORTH/WEST/SOUTH/EAST
-    "target": "'%s'" %(outfile) # can modify the path here
+    "target": "%s" %(outfile) # can modify the path here
 })

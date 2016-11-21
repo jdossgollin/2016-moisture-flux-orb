@@ -1,6 +1,7 @@
 figs/*
 processed/*
 .Rhistory
+reanalysis/*
 
 ## Ignore Mac OS Stuff
 .DS_Store
