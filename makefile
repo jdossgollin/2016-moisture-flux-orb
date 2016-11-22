@@ -40,6 +40,7 @@ tme_rda=processed/tme.rda
 tme_grid=processed/tme_gridded.rda
 tme_ts=processed/tme_ts.rda
 moisture_rda=processed/moisture.rda
+cyclone_rda=processed/cyclone_tracks.rda
 
 $(dipole_ts)	:	scripts/GetDipoleTS.R $(dlow_nc) $(dhigh_nc)
 	Rscript $< --nchigh=$(dhigh_nc) --nclow=$(dlow_nc) --outfile=$(dipole_ts)
@@ -53,9 +54,11 @@ $(tme_ts)	:	scripts/GetTMETS.R $(tme_grid) config/moisturebox.mk
 	Rscript $< --gridded=$(tme_grid) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outfile=$(tme_ts)
 $(moisture_rda)	:	scripts/ReadMoistureFlux.R $(moisture_nc)
 	Rscript $< --infile=$(moisture_nc) --outfile=$(moisture_rda)
+$(cyclone_rda)	:	scripts/GetCycloneTracks.R config/dates.mk config/moisturebox.mk
+	Rscript $< --trackpath="~/Documents/Work/Data/cyclone/"  --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(cyclone_rda)
 
 ## processed	:	read and analyze data sets
-processed	:  reanalysis $(dipole_ts) $(pna_rda) $(tme_rda) $(tme_grid) $(tme_ts) $(moisture_rda)
+processed	:  reanalysis $(dipole_ts) $(pna_rda) $(tme_rda) $(tme_grid) $(tme_ts) $(moisture_rda) $(cyclone_rda)
 
 
 # FIGURES
