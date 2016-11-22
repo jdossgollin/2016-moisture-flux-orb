@@ -10,6 +10,8 @@ option_list <- list(
               help="First year of data to collect [default %default]"),
   make_option("--eyear", type="integer", default="2013",
               help="Last year of data to collect [default %default]"),
+  make_option("--lag", type="integer", default="20",
+              help="Create a (n)-day running mean index of the PNA [default %default]"),
   make_option("--outfile", type="character", default="processed/pna.rda",
               help="Name of .rda file to store dipole time series  [default %default]")
 )
@@ -31,5 +33,8 @@ names(pna) <- c('year', 'month', 'day', 'pna')
 pna <- pna[year >= opt$syear & year <= opt$eyear]
 pna[, date := ymd(paste(year, month, day))]
 pna <- pna[, .(date, pna)]
+
+# add a n-day lag term
+pna[, pna_lag := stats::filter(pna, filter = rep(1 / opt$lag, opt$lag), sides = 1)]
 
 save(pna, file = opt$outfile)
