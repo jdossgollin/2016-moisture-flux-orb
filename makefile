@@ -45,7 +45,7 @@ cyclone_rda=processed/cyclone_tracks.rda
 $(dipole_ts)	:	scripts/GetDipoleTS.R $(dlow_nc) $(dhigh_nc)
 	Rscript $< --nchigh=$(dhigh_nc) --nclow=$(dlow_nc) --outfile=$(dipole_ts)
 $(pna_rda)	:	scripts/GetPNA.R config/dates.mk
-	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(pna_rda)
+	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --lag=30 --outfile=$(pna_rda)
 $(tme_rda)	:	scripts/GetTME.R config/dates.mk config/moisturebox.mk
 	Rscript $< --tmepath="~/Documents/Work/Data/TMEv2/" --syear=$(SYEAR) --eyear=$(EYEAR) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outfile=$(tme_rda)
 $(tme_grid)	:	scripts/GetGriddedTME.R $(tme_rda)

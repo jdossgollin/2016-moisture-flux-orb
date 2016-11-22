@@ -1,6 +1,7 @@
 # -------- Packages and Options -------
 
 pacman::p_load(data.table, magrittr, ncdf4, lubridate, optparse)
+pacman::p_load_gh('jdossgollin/JamesR')
 
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
