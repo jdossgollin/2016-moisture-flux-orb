@@ -23,10 +23,11 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 load(opt$gridded)
 gridded <- gridded[lon >= opt$lonmin & lon <= opt$lonmax & lat >= opt$latmin & lat <= opt$latmax]
-gridded <- gridded[, date := as_date(date_time)][, .(dQ = sum(dQ)), by = date]
+gridded <- gridded[, .(dQ = sum(dQ)), by = date_time]
 
-all_dates <- data.table(date = seq(gridded[, min(date)], gridded[, max(date)], 1))
-gridded <- merge(gridded, all_dates, by = 'date', all = T)
-gridded[is.na(dQ), dQ := 0]
+all_dates <- seq(gridded[, min(date_time)], gridded[, max(date_time)], 60*60*6) # by 6 hours
+all_dates <- data.table(date_time = all_dates)
+tme_ts <- merge(gridded, all_dates, by = 'date_time', all = T)
+tme_ts[is.na(dQ), dQ := 0]
 
-save(gridded, file = opt$outfile)
+save(tme_ts, file = opt$outfile)
