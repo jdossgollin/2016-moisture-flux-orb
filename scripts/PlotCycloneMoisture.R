@@ -65,7 +65,9 @@ plt_track_moisture %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_locn')
 data_locfit <- tracks[centroid_distance < dist_max]
 lf <- locfit(dq ~ ang(centroid_angle), data = data_locfit)
 crit(lf) <- crit(lf, cov = 0.95)
+pdf(file = paste0(opt$outpath, 'locfit.pdf'), width = 8, height = 4)
 plot(lf, band = "local", xlab = "Centroid Angle", ylab = "Expected Moisture Flux", main = "Centroid Angle Modulation of Moisture Flux", ylim = c(0, 1000))
+dev.off()
 
 # equivalent plot w/ a LOESS smooth
 ggplot(data_locfit, aes(x = centroid_angle, y = dq)) + 
