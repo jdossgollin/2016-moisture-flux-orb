@@ -24,7 +24,7 @@ opt <- parse_args(OptionParser(option_list=option_list))
 
 # -------- Begin Script -------
 
-centroid <- c(mean(c(opt$lonmin, opt$lonmax)), mean(c(opt$latmin, opt$latmax)))
+centroid <- c(mean(c(opt$lonmin, opt$lonmax)), opt$latmax)
 dist_max <- 25
 xl <- c(centroid[1] - dist_max - 5, centroid[1] + dist_max + 5)
 yl <- c(centroid[2] - dist_max - 5, centroid[2] + dist_max + 5)
@@ -38,9 +38,6 @@ setnames(world, 'long', 'lon')
 world_rgn <- world[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2], unique(region)]
 world <- world[region %in% world_rgn]
 
-# a new intensity index
-cyclones[, intensity := log(-intensity)]
-
 # Associate the Tracks & Moisture Flux Time Series
 setnames(cyclones, 'date_time', 'time')
 tracks <- merge(cyclones, q_mean, by = 'time')
@@ -50,15 +47,14 @@ tracks[, centroid_angle := atan2(lat - centroid[2], lon - centroid[1])]
 # Plot
 plt_track_moisture <- 
   ggplot(tracks[centroid_distance < dist_max], aes(x = lon, y = lat)) + 
+  geom_polygon(data = world, aes(group = group), color = 'gray', fill = 'gray', alpha = 0.5) +
   geom_point(aes(color = dq), size = 0.5) +
-  geom_path(data = world, aes(group = group)) +
   scale_color_gradient2() +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   facet_wrap('season') +
-  coord_quickmap() +
+  coord_quickmap(xlim = xl, ylim = yl) +
   theme_map(base_size = bsize) +
-  theme(legend.position = "bottom") +
-  xlim(xl) + ylim(yl)
+  theme(legend.position = "bottom")
 plt_track_moisture %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_locn'), pdf = T, width = 8, height = 10)
 
 # Locfit
@@ -71,11 +67,12 @@ dev.off()
 
 # equivalent plot w/ a LOESS smooth
 plt_angle <-
-  ggplot(data_locfit, aes(x = centroid_angle, y = dq)) + 
+  ggplot(data_locfit, aes(x = centroid_angle %% (2*pi), y = dq)) + 
   geom_point(size = 0.1, alpha = 0.1) +
   theme_minimal(base_size = bsize) +
   labs(x = "Centroid Angle Relative to Box Centroid", y = "Moisture Flux",
-       title = "Positional Modulation of Moisture Flux")
+       title = "Positional Modulation of Moisture Flux") +
+  scale_x_continuous(breaks = pi * seq(0, 2, 0.5), labels = function(x){paste0(x/pi, ' pi')})
 plt_angle %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_angle'), pdf = T, width = 7, height = 4)
 
 # propreties of each cyclone
@@ -94,13 +91,12 @@ random_cyclones[, type := 'Bootstrap']
 # plot tracks of random & strong cylones
 plt_track_conditional <-
   ggplot(rbind(strong_cyclones, random_cyclones), aes(x = lon, y = lat)) +
+  geom_polygon(data = world, aes(group = group), color = 'gray', fill = 'gray', alpha = 0.5) +  
   geom_path(aes(group = stormnum, color = intensity)) +
   facet_grid(type ~ season) +
   scale_color_distiller(palette = "YlOrRd", direction = 1) +
-  geom_path(data = world, aes(group = group)) +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   theme_map(base_size = bsize) +
-  coord_quickmap() +
-  theme(legend.position = "bottom") +
-  xlim(xl + c(-20, 20)) + ylim(yl)
+  coord_quickmap(xlim = xl, ylim = yl) +
+  theme(legend.position = "bottom")
 plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 12, height = 7)

@@ -84,4 +84,10 @@ cyclones[, stormnum := NULL]
 cyclones[, stormnum := .GRP, by = .(lon0, lat0, init_dt)]
 cyclones <- unique(cyclones)
 
+# rescale intensity index
+cyclones[, intensity := log(-intensity)]
+
+# pull out tropical cyclones (VERY VERY approximately)
+cyclones <- cyclones[lat0 >= 25]
+
 save(cyclones, file = opt$outfile)
