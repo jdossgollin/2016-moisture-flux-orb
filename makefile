@@ -62,10 +62,11 @@ processed	:  reanalysis $(dipole_ts) $(pna_rda) $(tme_rda) $(tme_grid) $(tme_ts)
 
 
 # FIGURES
-
+figs/moisture_cyclone_*.pdf	: scripts/PlotCycloneMoisture.R	$(moisture_rda) $(cyclone_rda) config/moisturebox.mk
+	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/moisture_cyclone_"
 
 ## figs	:	make the plots
-figs	:
+figs	:	figs/moisture_cyclone_*.pdf
 
 ## clean	:	reset to original (only raw data and scripts)
 clean	:

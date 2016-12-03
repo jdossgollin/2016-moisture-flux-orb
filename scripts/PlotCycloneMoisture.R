@@ -59,7 +59,7 @@ plt_track_moisture <-
   theme_map(base_size = bsize) +
   theme(legend.position = "bottom") +
   xlim(xl) + ylim(yl)
-#plt_track_moisture
+plt_track_moisture %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_locn'), pdf = T, width = 8, height = 10)
 
 # Locfit
 data_locfit <- tracks[centroid_distance < dist_max]
@@ -99,5 +99,5 @@ plt_track_conditional <-
   coord_quickmap() +
   theme(legend.position = "bottom") +
   xlim(xl + c(-20, 20)) + ylim(yl)
-# plt_track_conditional
+plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 8, height = 10)
 
