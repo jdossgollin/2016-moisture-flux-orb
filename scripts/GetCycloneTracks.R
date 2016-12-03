@@ -58,6 +58,10 @@ ReadCycloneNC <- function(fn){
   dt[, date0 := .SD[1, date], by = stormnum]
   dt[, season := GetSeasonDate(date0)]
   
+  # get init points
+  dt[, lon0 := .SD[1, lon], by = stormnum]
+  dt[, lat0 := .SD[1, lat], by = stormnum]
+  
   return(dt)
 }
 
@@ -70,8 +74,14 @@ for(i in 1:length(ncfiles)){
   cyclones[[i]] <- ReadCycloneNC(ncfiles[i])
 }
 cyclones <- rbindlist(cyclones)
-cyclones[, stormnum2 := .GRP, by = .(stormnum, date0)]
-cyclones[, stormnum := NULL]
-setnames(cyclones, 'stormnum2', 'stormnum')
 cyclones <- cyclones[year(date0) >= opt$syear & year(date0) <= opt$eyear]
+
+# fix names
+setnames(cyclones, 'date', 'date_time')
+setnames(cyclones, 'Intensity', 'intensity')
+setnames(cyclones, 'date0', 'init_dt')
+cyclones[, stormnum := NULL]
+cyclones[, stormnum := .GRP, by = .(lon0, lat0, init_dt)]
+cyclones <- unique(cyclones)
+
 save(cyclones, file = opt$outfile)
