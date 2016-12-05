@@ -15,20 +15,16 @@ dependencies	: scripts/InstallRPackages.R
 include config/*.mk
 
 # GET REANALYSIS DATA
-GRIDSIZE=1.0
 moisture_nc=reanalysis/moisture.nc
-dlow_nc=reanalysis/dipolelow.nc
-dhigh_nc=reanalysis/dipolehigh.nc
+gph_nc=reanalysis/gph.nc
 
 $(moisture_nc)	:	scripts/moisture_flux.py config/moisturebox.mk config/dates.mk
-	python3 $< --outfile $(moisture_nc) --bound $(MBNORTH) $(MBWEST) $(MBSOUTH) $(MBEAST) --grid $(GRIDSIZE) --syear $(SYEAR) --eyear $(EYEAR)
-$(dlow_nc)	:	scripts/download_dipole.py config/dipoleLow.mk config/dates.mk
-	python3 $< --outfile $(dlow_nc) --bound $(DLNORTH) $(DLWEST) $(DLSOUTH) $(DLEAST) --grid $(GRIDSIZE) --syear $(SYEAR) --eyear $(EYEAR)
-$(dhigh_nc)	:	scripts/download_dipole.py config/dipoleHigh.mk config/dates.mk
-	python3 $< --outfile $(dhigh_nc) --bound $(DHNORTH) $(DHWEST) $(DHSOUTH) $(DHEAST) --grid $(GRIDSIZE) --syear $(SYEAR) --eyear $(EYEAR)
+	python3 $< --outfile $(moisture_nc) --bound $(MBNORTH) $(MBWEST) $(MBSOUTH) $(MBEAST) --grid 1.0 --syear $(SYEAR) --eyear $(EYEAR)
+$(gph_nc)	:	scripts/download_gph.py config/dates.mk
+	python3 $< --outfile $(gph_nc) --bound 90 -180 0 180 --grid 2.5 --syear $(SYEAR) --eyear $(EYEAR)
 
 ## reanalysis	:	access reanalysis data
-reanalysis	: $(moisture_nc) $(dlow_nc) $(dhigh_nc)
+reanalysis	: $(moisture_nc) $(gph_nc)
 
 # How big to make the grids
 
@@ -41,15 +37,18 @@ tme_grid=processed/tme_gridded.rda
 tme_ts=processed/tme_ts.rda
 moisture_rda=processed/moisture.rda
 cyclone_rda=processed/cyclone_tracks.rda
+amo_rda=processed/amo.rda
 
-$(dipole_ts)	:	scripts/GetDipoleTS.R $(dlow_nc) $(dhigh_nc)
-	Rscript $< --nchigh=$(dhigh_nc) --nclow=$(dlow_nc) --outfile=$(dipole_ts)
+$(dipole_ts)	:	scripts/GetDipoleTS.R $(gph_nc)
+	Rscript $< --gphnc=$(gph_nc) --outfile=$(dipole_ts)
 $(pna_rda)	:	scripts/GetPNA.R config/dates.mk
 	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --lag=30 --outfile=$(pna_rda)
+$(amo_rda)	:	scripts/GetAMO.R config/dates.mk
+	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(amo_rda)
 $(tme_rda)	:	scripts/GetTME.R config/dates.mk config/moisturebox.mk
 	Rscript $< --tmepath="~/Documents/Work/Data/TMEv2/" --syear=$(SYEAR) --eyear=$(EYEAR) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outfile=$(tme_rda)
 $(tme_grid)	:	scripts/GetGriddedTME.R $(tme_rda)
-	Rscript $< --rawfile=$(tme_rda) --gridsize=$(GRIDSIZE) --outfile=$(tme_grid)
+	Rscript $< --rawfile=$(tme_rda) --gridsize=1.0 --outfile=$(tme_grid)
 $(tme_ts)	:	scripts/GetTMETS.R $(tme_grid) config/moisturebox.mk
 	Rscript $< --gridded=$(tme_grid) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outfile=$(tme_ts)
 $(moisture_rda)	:	scripts/ReadMoistureFlux.R $(moisture_nc)
@@ -58,8 +57,7 @@ $(cyclone_rda)	:	scripts/GetCycloneTracks.R config/dates.mk config/moisturebox.m
 	Rscript $< --trackpath="~/Documents/Work/Data/cyclone/"  --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(cyclone_rda)
 
 ## processed	:	read and analyze data sets
-processed	:  reanalysis $(dipole_ts) $(pna_rda) $(tme_rda) $(tme_grid) $(tme_ts) $(moisture_rda) $(cyclone_rda)
-
+processed	:  reanalysis $(dipole_ts) $(pna_rda) $(amo_rda) $(tme_rda) $(tme_grid) $(tme_ts) $(moisture_rda) $(cyclone_rda)
 
 # FIGURES
 figs/moisture_cyclone_*.pdf	: scripts/PlotCycloneMoisture.R	$(moisture_rda) $(cyclone_rda) config/moisturebox.mk

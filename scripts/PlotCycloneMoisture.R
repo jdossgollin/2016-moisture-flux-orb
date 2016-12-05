@@ -70,6 +70,7 @@ plt_angle <-
   ggplot(data_locfit, aes(x = centroid_angle %% (2*pi), y = dq)) + 
   geom_point(size = 0.1, alpha = 0.1) +
   theme_minimal(base_size = bsize) +
+  facet_wrap('season') +
   labs(x = "Centroid Angle Relative to Box Centroid", y = "Moisture Flux",
        title = "Positional Modulation of Moisture Flux") +
   scale_x_continuous(breaks = pi * seq(0, 2, 0.5), labels = function(x){paste0(x/pi, ' pi')})
