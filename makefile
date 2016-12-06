@@ -15,13 +15,16 @@ dependencies	: scripts/InstallRPackages.R
 include config/*.mk
 
 # GET REANALYSIS DATA
-moisture_nc=reanalysis/moisture.nc
-gph_nc=reanalysis/gph.nc
+moisture_nc=reanalysis/moisture.nc # moisture flux into the box
+gph_nc=reanalysis/gph.nc # northern hemisphere GPH heights
+tmp_nc=reanalysis/temperature.nc # northern hemisphere 2m temperatures
 
 $(moisture_nc)	:	scripts/moisture_flux.py config/moisturebox.mk config/dates.mk
 	python3 $< --outfile $(moisture_nc) --bound $(MBNORTH) $(MBWEST) $(MBSOUTH) $(MBEAST) --grid 1.0 --syear $(SYEAR) --eyear $(EYEAR)
 $(gph_nc)	:	scripts/download_gph.py config/dates.mk
 	python3 $< --outfile $(gph_nc) --bound 90 -180 0 180 --grid 2.5 --syear $(SYEAR) --eyear $(EYEAR)
+$(tmp_nc)	:	scripts/download_temp.py config/dates.mk
+	python3 $< --outfile $(tmp_nc) --bound 90 -180 0 180 --grid 2.5 --syear $(SYEAR) --eyear $(EYEAR)
 
 ## reanalysis	:	access reanalysis data
 reanalysis	: $(moisture_nc) $(gph_nc)

@@ -5,7 +5,7 @@ pacman::p_load_gh('jdossgollin/JamesR')
 # get command line options, if help option encountered print help and exit,
 # otherwise if options not found on command line then set defaults,
 option_list <- list(
-  make_option("--flux", type="character", default="processed/flux.rda",
+  make_option("--flux", type="character", default="processed/moisture.rda",
               help="The file containing the TME data  [default %default]"),
   make_option("--tracks", type="character", default="processed/cyclone_tracks.rda",
               help="The file containing the cyclone tracks data  [default %default]"),
