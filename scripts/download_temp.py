@@ -36,7 +36,7 @@ server.retrieve({
     "step": "0",
     "stream": "oper",
     "time": "00:00:00/06:00:00/12:00:00/18:00:00", # Time of Days
-    "type": "fc",
+    "type": "an",
     "format": "netcdf", # delete this if for some reason you want GRIB...
     "area": "%f/%f/%f/%f" %(latmax,lonmin,latmin,lonmax), # NORTH/WEST/SOUTH/EAST
     "target": "%s" %(outfile) # can modify the path here

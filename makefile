@@ -27,7 +27,7 @@ $(tmp_nc)	:	scripts/download_temp.py config/dates.mk
 	python3 $< --outfile $(tmp_nc) --bound 90 -180 0 180 --grid 2.5 --syear $(SYEAR) --eyear $(EYEAR)
 
 ## reanalysis	:	access reanalysis data
-reanalysis	: $(moisture_nc) $(gph_nc)
+reanalysis	: $(moisture_nc) $(gph_nc) $(tmp_nc)
 
 # How big to make the grids
 
@@ -35,6 +35,7 @@ reanalysis	: $(moisture_nc) $(gph_nc)
 # THE PROCESSED DATA
 dipole_ts=processed/dipole_ts.rda
 pna_rda=processed/pna.rda
+temp_rda=processed/temperature.rda
 tme_rda=processed/tme.rda
 tme_grid=processed/tme_gridded.rda
 tme_ts=processed/tme_ts.rda
@@ -58,9 +59,11 @@ $(moisture_rda)	:	scripts/ReadMoistureFlux.R $(moisture_nc)
 	Rscript $< --infile=$(moisture_nc) --outfile=$(moisture_rda)
 $(cyclone_rda)	:	scripts/GetCycloneTracks.R config/dates.mk config/moisturebox.mk
 	Rscript $< --trackpath="~/Documents/Work/Data/cyclone/"  --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(cyclone_rda)
+$(temp_rda)	:	scripts/ReadTemperature.R config/gmx_box.R config/dates.mk
+	Rscript $< --infile=$(tmp_nc) --gmx_box=config/gmx_box.R --outfile=$(temp_rda)
 
 ## processed	:	read and analyze data sets
-processed	:  reanalysis $(dipole_ts) $(pna_rda) $(amo_rda) $(tme_rda) $(tme_grid) $(tme_ts) $(moisture_rda) $(cyclone_rda)
+processed	:  reanalysis $(dipole_ts) $(pna_rda) $(amo_rda) $(tme_rda) $(tme_grid) $(tme_ts) $(moisture_rda) $(cyclone_rda) $(temp_rda)
 
 # FIGURES
 figs/moisture_cyclone_*.pdf	: scripts/PlotCycloneMoisture.R	$(moisture_rda) $(cyclone_rda) config/moisturebox.mk
