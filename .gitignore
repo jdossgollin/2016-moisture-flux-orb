@@ -2,6 +2,7 @@ figs/*
 processed/*
 .Rhistory
 reanalysis/*
+AGU-Poster/*.pdf
 
 ## Ignore Mac OS Stuff
 .DS_Store
