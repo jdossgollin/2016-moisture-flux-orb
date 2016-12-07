@@ -101,3 +101,5 @@ plt_track_conditional <-
   coord_quickmap(xlim = xl, ylim = yl) +
   theme(legend.position = "bottom")
 plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 12, height = 7)
+
+ggplot(merged, aes(x = amo, y = t2m)) + geom_density2d() + facet_wrap('season')

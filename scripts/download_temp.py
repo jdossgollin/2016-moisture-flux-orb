@@ -31,8 +31,8 @@ server.retrieve({
     "date": "%d-01-01/to/%d-12-31" %(syear, eyear),
     "expver": "1",
     "grid": "%f/%f" %(grid, grid),
-    "levtype": "sfc", # surface variable
-    "param": "167.128", # 2m temperature
+    "levtype": "sfc",
+    "param": "34.128",
     "step": "0",
     "stream": "oper",
     "time": "00:00:00/06:00:00/12:00:00/18:00:00", # Time of Days
