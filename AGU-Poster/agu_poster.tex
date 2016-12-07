@@ -1,0 +1,108 @@
+\documentclass[serif,mathserif,final]{beamer}
+\mode<presentation>{\usetheme{Lankton}}
+
+
+\usepackage[
+  orientation=landscape,
+  width=40in,height=30in,%size=a0, % paper size
+  scale=1.025 % font scale factor
+  ]{beamerposter}
+ \setbeamertemplate{caption}[numbered] % number figs
+
+% Graphics Path
+\usepackage{graphicx}
+\graphicspath{{"../figs/"}}
+
+% OTHER PACKAGE CALLS
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts,amssymb,pxfonts,eulervm,xspace}
+\usepackage{siunitx}
+\sisetup{round-mode = figures, round-precision = 3}
+\usepackage{cleveref}
+
+% Use BibLaTeX
+\usepackage[
+	backend=biber,
+	doi=false,
+	url=false,
+	isbn=false,
+	maxnames=3,
+	minnames = 1,
+	style=numeric-comp,
+	sorting=none,
+	natbib=true,
+	firstinits=true,
+	isbn=false
+  ]{biblatex}
+\renewbibmacro{in:}{}
+\addbibresource{../library.bib}
+\AtEveryBibitem{
+  \clearfield{month}
+  \clearlist {language}
+  \clearfield{pages}
+  \clearfield{pages}
+  \clearfield{volume}
+  \clearfield{number}
+  \clearfield{title}
+}
+
+%-- Header and footer information ----------------------------------
+\newcommand{\footleft}{\url{water.columbia.edu}}
+\newcommand{\footright}{\url{james.doss-gollin@columbia.edu}}
+\title{}
+\author{James Doss-Gollin\inst{1,2} \quad David Farnham\inst{1,2} \quad Upmanu Lall\inst{1,2}}
+\institute
+{\inst{1} Columbia Water Center \quad \inst{2} Department of Earth and Environmental Engineering, Columbia University}
+
+%-------------------------------------------------------------------
+
+
+%-- Main Document --------------------------------------------------
+\begin{document}
+\begin{frame}{}
+  \begin{columns}[t]
+
+    %-- Column 1 ---------------------------------------------------
+    \begin{column}{0.22\linewidth}
+
+        % Example Block
+        \input{blocks/example.tex}
+        \input{blocks/data-used.tex}
+
+    \end{column}%1
+
+    %-- Column 2 ---------------------------------------------------
+    \begin{column}{0.22\linewidth}
+
+        % Example Block
+        \input{blocks/example.tex}
+
+    \end{column}%2
+
+    %-- Column 3 ---------------------------------------------------
+    \begin{column}{0.22\linewidth}
+
+      % Example Block
+      \input{blocks/example.tex}
+
+    \end{column}%3
+
+
+    %-- Column 4 ---------------------------------------------------
+    \begin{column}{0.22\linewidth}
+
+      %-- Block 4-2
+      \begin{block}{References}
+          \renewcommand*{\bibfont}{\footnotesize}
+          \printbibliography[heading=none]
+      \end{block}
+
+      \begin{block}{Acknowledgements}
+          Thanks to Yochanan Kushnir, Jimmy Booth, Donna Lee
+      \end{block}
+
+    \end{column}%1
+
+  \end{columns}
+\end{frame}
+\end{document}
