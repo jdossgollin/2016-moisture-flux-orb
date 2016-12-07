@@ -36,6 +36,8 @@ high <- ncvar_get(nc, varid = 'z', start = high_start, count = high_count)
 high <- apply(high, 3, mean)
 
 # Merge the Dipole, Convert to hPa
-dipole <- data.table(date = times, dipole = (high - low) / 100)
+high <- high / 100
+low <- low / 100
+dipole <- data.table(date = times, low = low, high = high, dipole = (high - low))
 
 save(dipole, file = opt$outfile)
