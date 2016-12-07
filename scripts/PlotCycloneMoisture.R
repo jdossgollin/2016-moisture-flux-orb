@@ -18,7 +18,11 @@ option_list <- list(
   make_option("--lonmin", type="integer", default="-90",
               help="First year of data to collect [default %default]"),
   make_option("--lonmax", type="integer", default="-77.5",
-              help="Last year of data to collect [default %default]")
+              help="Last year of data to collect [default %default]"),
+  make_option("--month1", type="integer", default="12",
+              help="Months to include in study [default %default]"),
+  make_option("--month2", type="integer", default="3",
+              help="Months to include in study [default %default]")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
@@ -33,6 +37,11 @@ bsize <- 9
 load(opt$tracks)
 load(opt$flux)
 
+# Subset the raw data
+cyclones[, month := month(date_time)] # THIS IS OPEN FOR DISCUSSION
+cyclones <- cyclones[month >= opt$month1 | month <= opt$month2]
+q_mean <- q_mean[month(time) >= opt$month1 | month(time) <= opt$month2]
+
 world <- map_data('world') %>% as.data.table()
 setnames(world, 'long', 'lon')
 world_rgn <- world[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2], unique(region)]
@@ -45,13 +54,12 @@ tracks[, centroid_distance := sqrt((lon - centroid[1])^2 + (lat - centroid[2])^2
 tracks[, centroid_angle := atan2(lat - centroid[2], lon - centroid[1])]
 
 # Plot
-plt_track_moisture <- 
-  ggplot(tracks[centroid_distance < dist_max], aes(x = lon, y = lat)) + 
+plt_track_moisture <-
+  ggplot(tracks[centroid_distance < dist_max], aes(x = lon, y = lat)) +
   geom_polygon(data = world, aes(group = group), color = 'gray', fill = 'gray', alpha = 0.5) +
   geom_point(aes(color = dq), size = 0.5) +
   scale_color_gradient2() +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
-  facet_wrap('season') +
   coord_quickmap(xlim = xl, ylim = yl) +
   theme_map(base_size = bsize) +
   theme(legend.position = "bottom")
@@ -67,7 +75,7 @@ dev.off()
 
 # equivalent plot w/ a LOESS smooth
 plt_angle <-
-  ggplot(data_locfit, aes(x = centroid_angle %% (2*pi), y = dq)) + 
+  ggplot(data_locfit, aes(x = centroid_angle %% (2*pi), y = dq)) +
   geom_point(size = 0.1, alpha = 0.1) +
   theme_minimal(base_size = bsize) +
   facet_wrap('season') +
@@ -92,15 +100,12 @@ random_cyclones[, type := 'Bootstrap']
 # plot tracks of random & strong cylones
 plt_track_conditional <-
   ggplot(rbind(strong_cyclones, random_cyclones), aes(x = lon, y = lat)) +
-  geom_polygon(data = world, aes(group = group), color = 'gray', fill = 'gray', alpha = 0.5) +  
+  geom_polygon(data = world, aes(group = group), color = 'gray', fill = 'gray', alpha = 0.5) +
   geom_path(aes(group = stormnum, color = intensity)) +
-  facet_grid(type ~ season) +
+  facet_wrap('type') +
   scale_color_distiller(palette = "YlOrRd", direction = 1) +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   theme_map(base_size = bsize) +
   coord_quickmap(xlim = xl, ylim = yl) +
   theme(legend.position = "bottom")
 plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 12, height = 7)
-
-merged[, season := GetSeasonMonth(month)]
-ggplot(merged, aes(x = pna, y = t2m)) + geom_density2d() + facet_wrap('season')

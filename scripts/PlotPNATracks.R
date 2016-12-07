@@ -18,20 +18,29 @@ option_list <- list(
   make_option("--lonmin", type="integer", default="-90",
               help="First year of data to collect [default %default]"),
   make_option("--lonmax", type="integer", default="-77.5",
-              help="Last year of data to collect [default %default]")
+              help="Last year of data to collect [default %default]"),
+  make_option("--month1", type="integer", default="12",
+              help="Months to include in study [default %default]"),
+  make_option("--month2", type="integer", default="3",
+              help="Months to include in study [default %default]")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
 # -------- Begin Script -------
 
 centroid <- c(mean(c(opt$lonmin, opt$lonmax)), opt$latmax)
-dist_max <- 25
+dist_max <- 30
 xl <- c(centroid[1] - dist_max - 5, centroid[1] + dist_max + 5)
 yl <- c(centroid[2] - dist_max - 5, centroid[2] + dist_max + 5)
 bsize <- 9
 
 load(opt$tracks)
 load(opt$pna)
+
+# Subset the raw data
+cyclones[, month := month(date_time)] # THIS IS OPEN FOR DISCUSSION
+cyclones <- cyclones[month >= opt$month1 | month <= opt$month2]
+pna <- pna[month(date) >= opt$month1 | month(date) <= opt$month2]
 
 world <- map_data('world') %>% as.data.table()
 setnames(world, 'long', 'lon')
@@ -50,8 +59,9 @@ cyclones[, centroid_distance := sqrt((lon - centroid[1])^2 + (lat - centroid[2])
 cyclones[, centroid_angle := atan2(lat - centroid[2], lon - centroid[1])]
 cyclone_dist <- cyclones[, .(min_dist = min(centroid_distance)), by = stormnum]
 cyclones_orb <- cyclones[stormnum %in% cyclone_dist[min_dist <= dist_max, stormnum]]
+cyclones_orb <- na.omit(cyclones_orb)
 
-idx_orb_plt <- cyclones_orb[, .(stormnum = sample(stormnum, 100)), by = .(season, pna_cat)]
+idx_orb_plt <- cyclones_orb[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]][, .(stormnum = sample(stormnum, 250), replace = F), by = pna_cat]
 plt_tracks_pna <-
   cyclones_orb[stormnum %in% idx_orb_plt$stormnum][lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]] %>%
   ggplot(aes(x = lon, y = lat)) +
@@ -62,8 +72,8 @@ plt_tracks_pna <-
   theme_map(base_size = bsize) +
   coord_quickmap(xlim = xl, ylim = yl) +
   theme(legend.position = "bottom") +
-  facet_grid(season ~ pna_cat)
-plt_tracks_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'map_plot'), pdf = T, height = 10, width = 6)
+  facet_wrap('pna_cat')
+plt_tracks_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'map_plot'), pdf = T, height = 5, width = 10)
 
 plt_heatmap_pna <-
   cyclones_orb[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]] %>%
@@ -75,5 +85,5 @@ plt_heatmap_pna <-
   theme_map(base_size = bsize) +
   coord_quickmap(xlim = xl, ylim = yl) +
   theme(legend.position = "bottom") +
-  facet_grid(season ~ pna_cat)
-plt_heatmap_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'heatmap'), pdf = T, height = 10, width = 6)
+  facet_wrap('pna_cat')
+plt_heatmap_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'heatmap'), pdf = T, height = 5, width = 10)
