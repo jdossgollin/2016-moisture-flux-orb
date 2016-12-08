@@ -18,7 +18,7 @@ dipole <- list(high_x = c(-75, -62.5), high_y = c(30, 40), low_x = c(-95, -82.5)
 
 # read the dipole info
 nc <- nc_open(opt$gphnc)
-lons <- nc$dim$longitude$vals
+hlons <- nc$dim$longitude$vals
 lats <- nc$dim$latitude$vals
 levels <- nc$dim$level$vals
 times <- ymd_h('1900-01-01 0') + hours(nc$dim$time$vals)
@@ -36,8 +36,6 @@ high <- ncvar_get(nc, varid = 'z', start = high_start, count = high_count)
 high <- apply(high, 3, mean)
 
 # Merge the Dipole, Convert to hPa
-high <- high / 100
-low <- low / 100
 dipole <- data.table(date = times, low = low, high = high, dipole = (high - low))
 
 save(dipole, file = opt$outfile)

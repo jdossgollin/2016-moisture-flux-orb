@@ -25,8 +25,8 @@ nc_close(nc)
 nlat <- length(lats)
 nlon <- length(lons)
 
-q_east_net <- apply(q_east, 3, mean)
-q_north_net <- apply(q_north, 3, mean)
+q_east_net <- apply(q_east, 3, sum)
+q_north_net <- apply(q_north, 3, sum)
 q_mean <- data.table(time = time, dq = q_east_net + q_north_net)
 
 save(q_mean, file = opt$outfile)
