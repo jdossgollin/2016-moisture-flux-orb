@@ -5,6 +5,7 @@ processed/*
 .RData
 reanalysis/*
 AGU-Poster/*.pdf
+Writeup/*.pdf
 
 ## Ignore Mac OS Stuff
 .DS_Store
