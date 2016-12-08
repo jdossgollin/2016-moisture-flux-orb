@@ -26,9 +26,9 @@ times <- ymd_h('1900-01-01 0') + hours(nc$dim$time$val)
 start_idx <- c(which.min(abs(lons - gmx$lon[1])), which.min(abs(lats - gmx$lat[2])), 1)
 count_idx <- c(which.min(abs(lons - gmx$lon[2])) - start_idx[1] + 1, which.min(abs(lats - gmx$lat[1])) - start_idx[2] + 1, -1)
 temp <- ncvar_get(nc, 'sst', start = start_idx, count = count_idx)
-temp <- apply(temp, 3, mean)
+temp <- apply(temp, 3, mean, na.rm = T)
 
-temp <- data.table(time = times, t2m = temp)
+temp <- data.table(time = times, sst = temp)
 nc_close(nc)
 
 save(temp, file = opt$outfile)

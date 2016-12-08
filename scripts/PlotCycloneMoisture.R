@@ -65,25 +65,6 @@ plt_track_moisture <-
   theme(legend.position = "bottom")
 plt_track_moisture %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_locn'), pdf = T, width = 8, height = 10)
 
-# Locfit
-data_locfit <- tracks[centroid_distance < dist_max]
-lf <- locfit(dq ~ ang(centroid_angle), data = data_locfit)
-crit(lf) <- crit(lf, cov = 0.95)
-pdf(file = paste0(opt$outpath, 'locfit.pdf'), width = 8, height = 4)
-plot(lf, band = "local", xlab = "Centroid Angle", ylab = "Expected Moisture Flux", main = "Centroid Angle Modulation of Moisture Flux")
-dev.off()
-
-# equivalent plot w/ a LOESS smooth
-plt_angle <-
-  ggplot(data_locfit, aes(x = centroid_angle %% (2*pi), y = dq)) +
-  geom_point(size = 0.1, alpha = 0.1) +
-  theme_minimal(base_size = bsize) +
-  facet_wrap('season') +
-  labs(x = "Centroid Angle Relative to Box Centroid", y = "Moisture Flux",
-       title = "Positional Modulation of Moisture Flux") +
-  scale_x_continuous(breaks = pi * seq(0, 2, 0.5), labels = function(x){paste0(x/pi, ' pi')})
-plt_angle %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_angle'), pdf = T, width = 7, height = 4)
-
 # propreties of each cyclone
 by_cyclone <- data_locfit[order(stormnum)][, .(dq_max = max(dq)), by = .(stormnum, season)]
 

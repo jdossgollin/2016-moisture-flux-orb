@@ -1,6 +1,8 @@
 figs/*
 processed/*
 .Rhistory
+*.rda
+.RData
 reanalysis/*
 AGU-Poster/*.pdf
 

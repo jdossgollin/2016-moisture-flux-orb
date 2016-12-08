@@ -1,0 +1,93 @@
+\documentclass[11pt]{article}
+
+\usepackage[letterpaper, margin=1in]{geometry} % get the page set up correctly
+\pagenumbering{gobble}
+\usepackage{amsmath,amssymb} % math symbols
+\usepackage[section]{placeins} % put the floats in the section they come from always
+\usepackage{authblk} % authors
+\usepackage{siunitx} % SI units
+\usepackage{graphicx} % to include graphics
+\usepackage{natbib} % references
+\usepackage{physics} % math notation and vectors
+
+% code input
+\usepackage{listings}
+\lstset{
+    language=R,
+    basicstyle=\scriptsize\ttfamily,
+    stepnumber=1,
+    numbersep=3pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    tabsize=2,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    escapeinside={},
+    keywordstyle={},
+    morekeywords={}
+}
+
+% These calls come last
+\usepackage[hidelinks]{hyperref} % to simplify the use of \href
+\usepackage{cleveref} % better cross-references
+
+
+\bibliographystyle{agu}
+\graphicspath{{../figs/}}
+
+\title{Global-Local Interactions Modulate Tropical Moisture Export to the Ohio River Basin}
+\author[1,2]{James Doss-Gollin}
+\author[1,2]{David Farnham}
+\author[1,2]{Upmanu Lall}
+\affil[1]{Columbia Water Center}
+\affil[2]{Department of Earth and Environmental Engineering, Columbia University}
+
+\date{\today}
+
+\begin{document}
+
+\def\ci{\perp\!\!\!\perp}
+\def\ex{\mathbb{E}}
+\def\prob{\mathbb{P}}
+\def\ind{\mathbb{I}}
+\def\grad{\triangledown}
+\def\bigo{\mathcal{O}}
+\def\normal{\mathcal{N}}
+\def\bern{\text{Bernoulli}}
+\def\logit{\text{logit}}
+\def\binom{\text{Bin}}
+\def\poiss{\text{Poiss}}
+\def\cauchy{\text{Cauchy}}
+\def\sigmoid{\vb{\sigma}}
+\def\given{\big|}
+\maketitle
+%%%%%%%%%%%%%%%%%%%%
+
+\section{Conceptual Framework}
+
+
+
+
+\section{Model Implementation}
+
+I use the Bayesian model shown in \cref{sec:stan}.
+Essentially, the current iteration of the model takes a set of local predictors $X_{N \times p}$ and a set of global predictors $Z_{N \times k}$, as well as the predictand (moisture flux) $y_{N \times 1}$.
+\begin{enumerate}
+    \item For each observation in $y$, $y_i \sim \normal \qty(X_i^T \beta, \sigma)$ where $\beta$ is the set of coefficients on the local predictors and $\sigma$ is the standard deviation of the regression
+    \item for each local predictor in $X$, $X_{ij} \sim \normal \qty(Z_i^T \alpha_j, \tau_j)$, where $\alpha_j$ is the predictor of the global variables onto the $j$th local predictor, and $\tau_j$ is the standard deviation
+\end{enumerate}
+
+
+%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+\bibliography{../library.bib}
+
+\appendix
+\section{Stan Code} \label{sec:stan}
+\lstinputlisting{../scripts/Model1.stan}
+
+\end{document}
