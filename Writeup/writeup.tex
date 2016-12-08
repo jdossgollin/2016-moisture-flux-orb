@@ -1,4 +1,4 @@
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
 
 \usepackage[letterpaper, margin=1in]{geometry} % get the page set up correctly
 \pagenumbering{gobble}
@@ -9,9 +9,15 @@
 \usepackage{graphicx} % to include graphics
 \usepackage{natbib} % references
 \usepackage{physics} % math notation and vectors
+\usepackage{wrapfig}
+
+
 
 % code input
-\usepackage{listings}
+\renewcommand{\scriptsize}{\fontsize{7pt}{8pt}\selectfont}
+\usepackage{listings,float}
+\newfloat{lstfloat}{htbp}{lop}
+\floatname{lstfloat}{Listing}
 \lstset{
     language=R,
     basicstyle=\scriptsize\ttfamily,
@@ -63,22 +69,163 @@
 \def\cauchy{\text{Cauchy}}
 \def\sigmoid{\vb{\sigma}}
 \def\given{\big|}
+\def\stan{\texttt{Stan~}}
 \maketitle
 %%%%%%%%%%%%%%%%%%%%
 
+
+
 \section{Conceptual Framework}
 
+Managing and adapting flood risk requires estimates of the joint distribution of flood frequency and intensity into the future.
+While traditional approaches have taken either purely statistical or model chaining (climate model to hydrological model) paths, we view floods as being caused by a \emph{hierarchy of causal mechanisms} \cite[see][]{Merz2014}.
+Specifically, we hypothesize that there is a unique set of atmospheric circulation mechanisms that can lead to sufficient large-scale transport and convergence of moisture for extreme regional flooding.
+By identifying these circulation mechanisms and exploring their conditional probabilities given relatively lower-frequency and more predictable atmospheric circulation states, we hope to improve the ability to simulate extreme rainfall conditionally from forecasts.
+Ultimately, this will allow us to \emph{simulate the quantity of interest conditionally on forecast or hypothesized low-frequency variables}.
 
 
 
-\section{Model Implementation}
+\citet{Lavers2016} show that extreme moisture flux is more predictable than extreme rainfall on the West Coast, and for this reason we use integrated water vapor transport into the Ohio River Basin
 
-I use the Bayesian model shown in \cref{sec:stan}.
-Essentially, the current iteration of the model takes a set of local predictors $X_{N \times p}$ and a set of global predictors $Z_{N \times k}$, as well as the predictand (moisture flux) $y_{N \times 1}$.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{map_inset}
+    \caption{A map of our study area. Shaded area is the Ohio River Basin, while the box denotes the area over which integrated water vapor transport is summed. Inset shows Eastern United States with Ohio River Basin in blue.}
+    \label{fig:study-area}
+\end{figure}
+\begin{figure}
+    %\includegraphics{/path/to/figure}
+    \caption{\texttt{Would be great to add here a conceptual diagram}}
+    %\label{}
+\end{figure}
+
+
+\section{Exploratory Findings}
+
+\subsection{Preferred Cyclone Pathway Associated with High Moisture Flux}
+
+To associate cyclone tracks with the observed moisture flux, I simply associate each 6-hour track position with the concurrent moisture transport into the black box shown in \cref{fig:study-area}.
+\Cref{fig:position-given-flux} shows the moisture flux associated with these cyclones within a \SI{25}{\degree} radius of the black box.
+The most apparent feature is a region directly to the North-West of the Ohio River Basin where cyclone occurrence signifies a very high expected moisture flux.
+In this region, the flux is high relative to the climatological moisture flux shown in \cref{fig:flux-distribution}.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{moisture_cyclone_q_distribution}
+    \caption{Climatological DJF Moisture flux distribution into the Ohio River basin}
+    \label{fig:flux-distribution}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\textwidth]{moisture_cyclone_dq_given_locn}
+    \caption{Cyclone locations and associated moisture flux. Color indicates net moisture flux into the black box, in $\SI{1000}{\kilo\gram\per\meter\per\second}$}
+    \label{fig:position-given-flux}
+\end{figure}
+
+It is also useful to associate moisture flux with full cyclone tracks, rather than their instantaneous locations.
+To do this I take the maximum instantaneous flux experienced along the track of the cyclone\footnote{this leaves a lot to be desired -- suggestions welcome} for each track.
+\Cref{fig:tracks-given-flux} shows the tracks that led to extreme (97.5 quantile exceedance) moisture flux versus a bootstrap of all cyclones.
+A clear preferred pathway is apparent for the cyclone tracks that are associated with high moisture flux.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{moisture_cyclone_tracks_given_flux}
+    \caption{(R) Cyclone tracks associated with high moisture flux; (L) a bootstrap sample, of equal size, of randomly chosen cyclone tracks.}
+    \label{fig:tracks-given-flux}
+\end{figure}
+
+This is consistent with our previous findings looking at extreme rainfall in the region, where we have found that extreme rainfall in this region is associated with a ridge to the East (often persistent), and a transient low pressure whose exact location varies but generally leads to a dipole (or, looking farther to the West, a tripole) patter.
+We have found that this leads to the expected anomalous moisture transport, again consistent with previous findings from our own work and others \citep{Nakamura2012,Lavers2013a,Steinschneider2016a}.
+
+
+\subsection{PNA Influence}
+
+There is a well-documented \citep[ie][]{Nakamura2012,Robertson2015,Steinschneider2015a} link between the PNA oscillation and extreme rainfall or flooding in this region.
+\Cref{fig:tracks-given-pna} shows cyclone tracks associated with negative, neutral, and positive phases of the PNA (only Eastern North America is shown).
+The pathway associated with intense moisture vapor transport shown in \cref{fig:tracks-given-flux} is clearly enhanced during the negative PNA phase, and suppressed during the positive phase.
+Preliminary further analysis suggests that this may be due to both steering and to the ehnahcement/suppression of cyclogenesis in particular regions that tend to track to/away from this high-moisture path.\footnote{If you know more about this, I'd be interested to learn more}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{pna_cyclone_map_plot}
+    \caption{Cyclone tracks associated with the (L) negative, (C) neutral, and (R) positive terciles of the daily PNA index.}
+    \label{fig:tracks-given-pna}
+\end{figure}
+
+\section{Data Used}
+
+I use ERA-Interim reanalysis \cite{Dee2011}.
+The cyclone tracks are courtesy of Donna Lee who generated them from ERA-Interim sea level pressure using the methodology of \citet{Hodges1994} and whose results have been verified in \cite{Booth2015}.
+The PNA and AMO data from from the NCEP web site.
+
+\section{Statistical Modeling}
+
+
+\subsection{Variable Summary}
+
+The variables I include in my analysis are the following
+\begin{description}
+    \item[Moisture Flux] the summed moisture flux into the black box in \cref{fig:study-area}
+    \item[SSTs] Mean sea surface temperature over a box covering the Gulf of Mexico
+    \item[Dipole low] The geopotential height anomaly over the Eastern North America box defined in \citet{Farnham2016}
+    \item[Dipole high] The geopotential height anomaly over the Western North Atlantic box defined in \citet{Farnham2016}
+    \item[PNA] daily PNA index
+    \item[AMO] monthly AMO index
+    \item[weight] See \cref{sec:challenges}
+\end{description}
+
+\subsection{Model Implementation}
+
+The \stan code for my model implementation is shown in \cref{sec:stan}.
+This model takes requires three fundamental data blocks:
 \begin{enumerate}
-    \item For each observation in $y$, $y_i \sim \normal \qty(X_i^T \beta, \sigma)$ where $\beta$ is the set of coefficients on the local predictors and $\sigma$ is the standard deviation of the regression
-    \item for each local predictor in $X$, $X_{ij} \sim \normal \qty(Z_i^T \alpha_j, \tau_j)$, where $\alpha_j$ is the predictor of the global variables onto the $j$th local predictor, and $\tau_j$ is the standard deviation
+    \item $y_{N \times 1}$, the observed data (in this case, the moisture flux)
+    \item $X_{N \times p}$, the ``local'' factors that directly govern the $y$
+    \item $Z_{N \times k}$, the ``global'' factors that are hypothesized to govern the $X$
 \end{enumerate}
+then, the model is formulated
+\begin{align}
+    y_t & \sim \normal \qty(\beta_0 + X'_t \beta, \sigma^2) \quad t = 1, \ldots, T \label{eq:yX}\\
+    X_{t,j} &\sim \normal \qty(\alpha_{0,j} + Z'_t \alpha_j, \tau_j^2) \quad j = 1, \ldots, p \label{eq:XZ}
+\end{align}
+$\normal$ signifies the univariate normal distribution.
+An example of this is implemented below.
+The coefficients are somewhat hard to interpret; in this example, $X$ contains first the 0-1 cyclone hit score and second the value of the high box of the dipole from our previous paper.
+$Z$ contains the daily PNA index.
+
+\subsection{Results}
+
+\begin{lstfloat}
+    \lstinputlisting{../processed/stan.txt}
+    \caption{Current iteration of \stan code for multi-level parameter estimation \label{stan:model}}
+\end{lstfloat}
+
+This inference, summarized in Listing \ref{stan:model}, suggests that having a cyclone in the target region (a ``hit'') increases the expected moisture flux (this particular data is normalized by the box area) by $\approx \SI{150}{\kilogram\per\meter \per \second}$ (per 1 degree sqared), and that increasing the value of the high dipole (again, units are a little strange -- will address) by $\SI{100}{\pascal}$ increases the expected moisture flux by \SI{15}{\kilogram\per\meter\per\second}.
+
+The $\alpha_{1,1}$ coefficient describes the PNA regression on cyclone hits (increasing the PNA by 1 standard deviation decreases the probability of a hit by 0.02 -- compare to a mean value of $\alpha_{0,1} = 0.1$) and $\alpha_{1,2}$ decreases the expected height anomaly over the Western Atlantic.
+
+These findings are in line with expectation from first principles and previous observational studies, but have not (to my knowledge) been simulatneously estimated in a Bayesian context.
+
+
+
+\section{Ongoing Challenges} \label{sec:challenges}
+
+The first challenge I see is to identify intelligent and robust priors for the model specified in \cref{eq:yX,eq:XZ}.
+I'm interested in potentially using Cauchy parameters to encourage sparsity but haven't yet tested this.
+
+I also need a way to parameterize the cyclone location.
+Ideally I'd like to come up with a one-dimensional index (though 2-D would be OK) that could score whether there is a cyclone track centered in a region of interest.
+\Cref{fig:cyclone-center-moisture} shows that there is a clear relationship between the locations of extratropical cyclones and moisture transport into the Ohio River Basin.
+In particular, there is a South-East to North-West pattern where tracks associated with high moisture flux are associated.
+I'm currently parameterizing this as a zero-one hit score over a parallelogram that roughly captures this area, but I'd like to do better.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.75\textwidth,height=5in,keepaspectratio=true]{moisture_cyclone_dq_given_locn}
+    \caption{Each dot shows the position of an extratropical cyclone \citep[see][]{Booth2015} located near the Ohio River Basin and the color of the dot gives the concurrent net moisture transport into the black box.}
+    \label{fig:cyclone-center-moisture}
+\end{figure}
+
+Finally, I need to add more parameters to the model.
+
 
 
 %%%%%%%%%%%%%%%%%%%%
@@ -86,6 +233,7 @@ Essentially, the current iteration of the model takes a set of local predictors 
 \clearpage
 \bibliography{../library.bib}
 
+\clearpage
 \appendix
 \section{Stan Code} \label{sec:stan}
 \lstinputlisting{../scripts/Model1.stan}

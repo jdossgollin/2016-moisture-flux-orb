@@ -85,10 +85,9 @@ stan_data <- list(
   y = mrg$dq
 )
 stan_fit <- stan(file = 'scripts/Model1.stan', data = stan_data, chains = 1)
-par_plot <- c('beta1', 'sigma')
-print(stan_fit, pars = par_plot)
-traceplot(stan_fit, pars = par_plot) + theme_base(base_size = 10)
-plot(stan_fit, pars = par_plot) + theme_base(base_size = 10)
+print(stan_fit) 
+traceplot(stan_fit) + theme_base(base_size = 10)
+plot(stan_fit) + theme_base(base_size = 10)
 
 # compare to OLS
 ols <- lm(mrg$dq ~ as.matrix(local_factors))

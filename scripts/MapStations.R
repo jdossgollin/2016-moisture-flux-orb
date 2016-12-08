@@ -8,13 +8,21 @@ option_list <- list(
   make_option("--shapefile", type="character", default = 'raw/BasinShapefile/FHP_Ohio_River_Basin_boundary',
               help="Path and file beginning for output figures  [default %default]"),
   make_option("--outpath", type="character", default="figs/map_",
-              help="Path and file beginning for output figures  [default %default]")
+              help="Path and file beginning for output figures  [default %default]"),
+  make_option("--latmin", type="integer", default="35",
+              help="First year of data to collect [default %default]"),
+  make_option("--latmax", type="integer", default="42.5",
+              help="Last year of data to collect [default %default]"),
+  make_option("--lonmin", type="integer", default="-90",
+              help="First year of data to collect [default %default]"),
+  make_option("--lonmax", type="integer", default="-77.5",
+              help="Last year of data to collect [default %default]")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
-basin_points <- opt$shapefile %>% 
-  maptools::readShapePoly() %>% 
-  ggplot2::fortify() %>% 
+basin_points <- opt$shapefile %>%
+  maptools::readShapePoly() %>%
+  ggplot2::fortify() %>%
   data.table()
 
 boundary <- ggmap::make_bbox(basin_points$long, basin_points$lat, f = 0)
@@ -26,17 +34,18 @@ lonmin <- boundary[1] - 5
 lonmax <- boundary[3] + 5
 
 station_map <-
-  ggplot(map_data("state"), aes(x = long, y = lat)) + 
+  ggplot(map_data("state"), aes(x = long, y = lat)) +
   geom_path(aes(group = group)) +
   geom_polygon(aes(x = long,y = lat),
                fill = "gray", data = basin_points, alpha = 0.4) +
+  geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   theme_map() +
   scale_alpha_continuous(range = c(0.2, 0.5), name = 'Years of Data') +
   coord_quickmap(xlim = c(lonmin, lonmax), ylim = c(latmin, latmax)) +
   theme(legend.position = "bottom")
 
-map_inset <- 
-  ggplot(map_data("state"), aes(x = long, y = lat)) + 
+map_inset <-
+  ggplot(map_data("state"), aes(x = long, y = lat)) +
   geom_path(aes(group = group)) +
   geom_polygon(aes(x = long,y = lat),
                fill = "blue", data = basin_points, alpha = 0.8) +
@@ -47,9 +56,9 @@ map_inset <-
 
 p2_grob <- ggplotGrob(map_inset)
 station_map <-
-  station_map + 
+  station_map +
   annotation_custom(grob = p2_grob,
-                       xmin = lonmin, xmax = lonmin + 8, 
+                       xmin = lonmin, xmax = lonmin + 8,
                        ymin = latmax - 4, ymax = latmax)
 
-station_map %>% JamesR::EZPrint(fn = opt$outpath, pdf = T, width = 8, height = 6)
+station_map %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'inset'), pdf = T, width = 8, height = 6)

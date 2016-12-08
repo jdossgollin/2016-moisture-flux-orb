@@ -53,6 +53,17 @@ tracks <- merge(cyclones, q_mean, by = 'time')
 tracks[, centroid_distance := sqrt((lon - centroid[1])^2 + (lat - centroid[2])^2)]
 tracks[, centroid_angle := atan2(lat - centroid[2], lon - centroid[1])]
 
+# adjust the units of the DQ
+normalizing_factor = 1e3
+tracks[, dq := dq / normalizing_factor]
+
+# a really simple but useful one
+pdf(file = paste0(opt$outpath, 'q_distribution.pdf'), width = 6, height = 3.5)
+q_mean[, month := month(time)][month >= opt$month1 | month <= opt$month2, dq / normalizing_factor] %>% 
+  hist(xlab = paste0("Net Moisture Flux (", normalizing_factor, " kg/m/s)"), ylab = "", yaxt = "n",
+       main = "Moisture Flux into Ohio River Basin")
+dev.off()
+
 # Plot
 plt_track_moisture <-
   ggplot(tracks[centroid_distance < dist_max], aes(x = lon, y = lat)) +
@@ -63,10 +74,10 @@ plt_track_moisture <-
   coord_quickmap(xlim = xl, ylim = yl) +
   theme_map(base_size = bsize) +
   theme(legend.position = "bottom")
-plt_track_moisture %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_locn'), pdf = T, width = 8, height = 10)
+plt_track_moisture %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'dq_given_locn'), pdf = T, width = 6, height = 7.5)
 
 # propreties of each cyclone
-by_cyclone <- data_locfit[order(stormnum)][, .(dq_max = max(dq)), by = .(stormnum, season)]
+by_cyclone <- tracks[centroid_distance <= dist_max][order(stormnum)][, .(dq_max = max(dq)), by = .(stormnum, season)]
 
 # strongest cyclones & equal bootstrap sample
 by_cyclone[, rank := rank(-dq_max, ties.method = "random"), by = season]
@@ -89,4 +100,4 @@ plt_track_conditional <-
   theme_map(base_size = bsize) +
   coord_quickmap(xlim = xl, ylim = yl) +
   theme(legend.position = "bottom")
-plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 12, height = 7)
+plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 9, height = 5)

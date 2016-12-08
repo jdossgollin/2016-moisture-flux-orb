@@ -62,13 +62,16 @@ $(temp_rda)	:	scripts/ReadTemperature.R config/gmx_box.R config/dates.mk
 processed	:  reanalysis $(dipole_ts) $(pna_rda) $(amo_rda) $(moisture_rda) $(cyclone_rda) $(temp_rda)
 
 # FIGURES
-figs/moisture_cyclone_*.pdf	: scripts/PlotCycloneMoisture.R	$(moisture_rda) $(cyclone_rda) config/moisturebox.mk
-	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/moisture_cyclone_"
+figs/moisture_cyclone_*.pdf	:	scripts/PlotCycloneMoisture.R $(moisture_rda) $(cyclone_rda)
+	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --outpath="figs/moisture_cyclone_"  --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --month1=12 --month2=2
 figs/pna_cyclone_*.pdf	: scripts/PlotPNATracks.R	$(pna_rda) $(cyclone_rda) config/moisturebox.mk
 	Rscript $< --pna=$(pna_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/pna_cyclone_"
+figs/map_*.pdf	:	scripts/MapStations.R raw/BasinShapefile/FHP_Ohio_River_Basin_boundary.* config/moisturebox.mk
+	Rscript $< --shapefile="raw/BasinShapefile/FHP_Ohio_River_Basin_boundary"  --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/map_"
+
 
 ## figs	:	make the plots
-figs	:	figs/moisture_cyclone_*.pdf figs/pna_cyclone_*.pdf
+figs	:	figs/moisture_cyclone_*.pdf figs/pna_cyclone_*.pdf figs/map_*.pdf
 
 ## clean	:	reset to original (only raw data and scripts)
 clean	:

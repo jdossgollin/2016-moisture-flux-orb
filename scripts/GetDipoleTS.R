@@ -18,7 +18,7 @@ dipole <- list(high_x = c(-75, -62.5), high_y = c(30, 40), low_x = c(-95, -82.5)
 
 # read the dipole info
 nc <- nc_open(opt$gphnc)
-hlons <- nc$dim$longitude$vals
+lons <- nc$dim$longitude$vals
 lats <- nc$dim$latitude$vals
 levels <- nc$dim$level$vals
 times <- ymd_h('1900-01-01 0') + hours(nc$dim$time$vals)
@@ -39,3 +39,4 @@ high <- apply(high, 3, mean)
 dipole <- data.table(date = times, low = low, high = high, dipole = (high - low))
 
 save(dipole, file = opt$outfile)
+nc_close(nc)
