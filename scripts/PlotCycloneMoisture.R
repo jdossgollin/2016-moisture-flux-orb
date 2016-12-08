@@ -54,7 +54,7 @@ tracks[, centroid_distance := sqrt((lon - centroid[1])^2 + (lat - centroid[2])^2
 tracks[, centroid_angle := atan2(lat - centroid[2], lon - centroid[1])]
 
 # adjust the units of the DQ
-normalizing_factor = 1e3
+normalizing_factor = 1e4
 tracks[, dq := dq / normalizing_factor]
 
 # a really simple but useful one

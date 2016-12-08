@@ -14,7 +14,7 @@
 
 
 % code input
-\renewcommand{\scriptsize}{\fontsize{7pt}{8pt}\selectfont}
+\renewcommand{\scriptsize}{\fontsize{8pt}{8pt}\selectfont}
 \usepackage{listings,float}
 \newfloat{lstfloat}{htbp}{lop}
 \floatname{lstfloat}{Listing}
@@ -118,7 +118,7 @@ In this region, the flux is high relative to the climatological moisture flux sh
 \begin{figure}
     \centering
     \includegraphics[width=0.75\textwidth]{moisture_cyclone_dq_given_locn}
-    \caption{Cyclone locations and associated moisture flux. Color indicates net moisture flux into the black box, in $\SI{1000}{\kilo\gram\per\meter\per\second}$}
+    \caption{Cyclone locations and associated moisture flux. Color indicates net moisture flux into the black box, in $\SI{1e4}{\kilo\gram\per\meter\per\second}$. }
     \label{fig:position-given-flux}
 \end{figure}
 
@@ -129,7 +129,7 @@ A clear preferred pathway is apparent for the cyclone tracks that are associated
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{moisture_cyclone_tracks_given_flux}
-    \caption{(R) Cyclone tracks associated with high moisture flux; (L) a bootstrap sample, of equal size, of randomly chosen cyclone tracks.}
+    \caption{(R) Cyclone tracks associated with high moisture flux; (L) a bootstrap sample, of equal size, of randomly chosen cyclone tracks. Cyclone intensity computed following \citet{Booth2015} and rescaled as $\log \qty(-I)$.}
     \label{fig:tracks-given-flux}
 \end{figure}
 
@@ -147,31 +147,33 @@ Preliminary further analysis suggests that this may be due to both steering and 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth]{pna_cyclone_map_plot}
-    \caption{Cyclone tracks associated with the (L) negative, (C) neutral, and (R) positive terciles of the daily PNA index.}
+    \caption{Cyclone tracks associated with the (L) negative, (C) neutral, and (R) positive terciles of the daily PNA index.  Cyclone intensity as \cref{fig:tracks-given-flux}.}
     \label{fig:tracks-given-pna}
 \end{figure}
 
 \section{Data Used}
 
-I use ERA-Interim reanalysis \cite{Dee2011}.
+I use ERA-Interim reanalysis \citep{Dee2011}.
 The cyclone tracks are courtesy of Donna Lee who generated them from ERA-Interim sea level pressure using the methodology of \citet{Hodges1994} and whose results have been verified in \cite{Booth2015}.
 The PNA and AMO data from from the NCEP web site.
 
 \section{Statistical Modeling}
 
 
-\subsection{Variable Summary}
+\subsection{Variable Summary} \label{sec:var-summary}
+
 
 The variables I include in my analysis are the following
 \begin{description}
-    \item[Moisture Flux] the summed moisture flux into the black box in \cref{fig:study-area}
-    \item[SSTs] Mean sea surface temperature over a box covering the Gulf of Mexico
-    \item[Dipole low] The geopotential height anomaly over the Eastern North America box defined in \citet{Farnham2016}
-    \item[Dipole high] The geopotential height anomaly over the Western North Atlantic box defined in \citet{Farnham2016}
-    \item[PNA] daily PNA index
-    \item[AMO] monthly AMO index
+    \item[Moisture Flux] the summed moisture flux into the black box in \cref{fig:study-area}. Units are in \SI{10000}{\kilo\gram H_2O \per\meter\per\second}
+    \item[SSTs] Mean sea surface temperature over a box covering the Gulf of Mexico. Units are in \si{\kelvin} and have been rescaled to the standard normal.
+    \item[Dipole low] The geopotential height anomaly over the Eastern North America box defined in \citet{Farnham2016}. Units are in \si{\pascal} and have been rescaled to the standard normal.
+    \item[Dipole high] The geopotential height anomaly over the Western North Atlantic box defined in \citet{Farnham2016}. Units are in \si{\pascal} and have been rescaled to the standard normal.
+    \item[PNA] daily PNA index. Units are standardized for all seasons; the DJF distribution is not fully a standard normal.
+    \item[AMO] monthly AMO index. Units are standardized for all seasons; the DJF distribution is not fully a standard normal.
     \item[weight] See \cref{sec:challenges}
 \end{description}
+\Cref{sec:parameters} showx the joint and marginal distributions of these parameters.
 
 \subsection{Model Implementation}
 
@@ -194,17 +196,38 @@ $Z$ contains the daily PNA index.
 
 \subsection{Results}
 
+The posterior
 \begin{lstfloat}
-    \lstinputlisting{../processed/stan.txt}
-    \caption{Current iteration of \stan code for multi-level parameter estimation \label{stan:model}}
+    \lstinputlisting{../bayesian/stan_out.txt}
+    \caption{Summary of posterior distributions estimated in \stan  \label{stan:fit}}
 \end{lstfloat}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{bayesian_posterior}
+    \caption{Posterior parameter distributions}
+    \label{label:stan-plot}
+\end{figure}
 
-This inference, summarized in Listing \ref{stan:model}, suggests that having a cyclone in the target region (a ``hit'') increases the expected moisture flux (this particular data is normalized by the box area) by $\approx \SI{150}{\kilogram\per\meter \per \second}$ (per 1 degree sqared), and that increasing the value of the high dipole (again, units are a little strange -- will address) by $\SI{100}{\pascal}$ increases the expected moisture flux by \SI{15}{\kilogram\per\meter\per\second}.
 
-The $\alpha_{1,1}$ coefficient describes the PNA regression on cyclone hits (increasing the PNA by 1 standard deviation decreases the probability of a hit by 0.02 -- compare to a mean value of $\alpha_{0,1} = 0.1$) and $\alpha_{1,2}$ decreases the expected height anomaly over the Western Atlantic.
+This inference, summarized in Listing \ref{stan:fit}, are slightly difficult to interpret.
+\Cref{sec:var-summary} shows the actual units of the physical quantities.
+
+Examining the $\beta_1,\beta_2$ values, we see that increasing the amplitude of the eastern ridge by one standard deviation produces approximately the same impact (slightly higher) as a cyclone `hit' on moisture flux, but that both lead to large increases in expected moisture flux.
+Exploring the second-order ($X$ dependence on $Z$) effects (note that the $X$ have different units here), we see that increasing the Gulf of Mexico SSTs, a positive AMO, and a negative PNA all lead to an expected increase in the Western Atlantic Ridge anomaly.
+However, the impacts of the AMO and Gulf of Mexico SSTs on the probability of a cyclone hit are relatively small, though a negative PNA increases the probability.
 
 These findings are in line with expectation from first principles and previous observational studies, but have not (to my knowledge) been simulatneously estimated in a Bayesian context.
+They are also in line with the statistical hypothesis that \emph{all} the interactions have some \emph{non-zero} effect, but that a small subset of effects are large.
+Thus, hypothesis testing against a null hypothesis that the effect magnitude is exactly zero is not meaningful for describing effect sizes.
 
+While it is not a full posterior model check, it is helpful to examine the simulation traces of the simulation to ensure model mixing and convergence.
+\Cref{label:stan-trace} shows that convergence and mixing is excellent for all parameters observed.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{bayesian_traceplot}
+    \caption{Traceplot of posterior simulations}
+    \label{label:stan-trace}
+\end{figure}
 
 
 \section{Ongoing Challenges} \label{sec:challenges}
@@ -214,17 +237,11 @@ I'm interested in potentially using Cauchy parameters to encourage sparsity but 
 
 I also need a way to parameterize the cyclone location.
 Ideally I'd like to come up with a one-dimensional index (though 2-D would be OK) that could score whether there is a cyclone track centered in a region of interest.
-\Cref{fig:cyclone-center-moisture} shows that there is a clear relationship between the locations of extratropical cyclones and moisture transport into the Ohio River Basin.
+\Cref{fig:position-given-flux} shows that there is a clear relationship between the locations of extratropical cyclones and moisture transport into the Ohio River Basin.
 In particular, there is a South-East to North-West pattern where tracks associated with high moisture flux are associated.
 I'm currently parameterizing this as a zero-one hit score over a parallelogram that roughly captures this area, but I'd like to do better.
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.75\textwidth,height=5in,keepaspectratio=true]{moisture_cyclone_dq_given_locn}
-    \caption{Each dot shows the position of an extratropical cyclone \citep[see][]{Booth2015} located near the Ohio River Basin and the color of the dot gives the concurrent net moisture transport into the black box.}
-    \label{fig:cyclone-center-moisture}
-\end{figure}
 
-Finally, I need to add more parameters to the model.
+Finally, I need to add more parameters to the model and perform model checking; my linear normal assumptions may not make very much sense.
 
 
 
@@ -236,6 +253,20 @@ Finally, I need to add more parameters to the model.
 \clearpage
 \appendix
 \section{Stan Code} \label{sec:stan}
-\lstinputlisting{../scripts/Model1.stan}
+\lstinputlisting{../bayesian/Model1.stan}
+
+\section{Joint and Marginal Distributions} \label{sec:parameters}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{joint_distribution_everything}
+    \caption{The pairwise distributions of the model parameters}
+    \label{fig:joint-distributions}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{marginal_distributions}
+    \caption{The marginal distributions of the model parameters}
+    \label{fig:joint-distributions}
+\end{figure}
 
 \end{document}
