@@ -6,6 +6,7 @@ processed/*
 reanalysis/*
 AGU-Poster/*.pdf
 Writeup/*.pdf
+*.txt
 
 ## Ignore Mac OS Stuff
 .DS_Store

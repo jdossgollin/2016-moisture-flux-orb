@@ -45,6 +45,7 @@ temp_rda=processed/temperature.rda
 moisture_rda=processed/moisture.rda
 cyclone_rda=processed/cyclone_tracks.rda
 amo_rda=processed/amo.rda
+locfit_rda=processed/locfit_model.rda
 
 $(dipole_ts)	:	scripts/GetDipoleTS.R $(gph_nc)
 	Rscript $< --gphnc=$(gph_nc) --outfile=$(dipole_ts)
@@ -58,9 +59,11 @@ $(cyclone_rda)	:	scripts/GetCycloneTracks.R config/dates.mk config/moisturebox.m
 	Rscript $< --trackpath="~/Documents/Work/Data/cyclone/"  --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(cyclone_rda)
 $(temp_rda)	:	scripts/ReadTemperature.R config/gmx_box.R config/dates.mk
 	Rscript $< --infile=$(tmp_nc) --gmx_box=config/gmx_box.R --outfile=$(temp_rda)
+$(locfit_rda)	:	scripts/LocfitCycloneWeights.R $(cyclone_rda) $(moisture_rda) config/moisturebox.mk
+	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/locfit_weight_" --outfile=$(locfit_rda)
 
 ## processed	:	read and analyze data sets
-processed	:  reanalysis $(dipole_ts) $(pna_rda) $(amo_rda) $(moisture_rda) $(cyclone_rda) $(temp_rda)
+processed	:  reanalysis $(dipole_ts) $(pna_rda) $(amo_rda) $(moisture_rda) $(cyclone_rda) $(temp_rda) $(locfit_rda)
 
 #------ MAKE PLOTS ------#
 
