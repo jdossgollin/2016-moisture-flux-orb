@@ -1,5 +1,5 @@
 # -------- Packages and Options -------
-pacman::p_load(RNCEP, data.table, magrittr, lubridate, ggplot2, ggthemes, locfit, rstan, optparse, ggmap)
+pacman::p_load(RNCEP, data.table, magrittr, lubridate, ggplot2, ggthemes, ncdf4, optparse, ggmap)
 pacman::p_load_gh('jdossgollin/JamesR')
 
 # get command line options, if help option encountered print help and exit,
@@ -9,10 +9,14 @@ option_list <- list(
               help="The file containing the TME data  [default %default]"),
   make_option("--tracks", type="character", default="processed/cyclone_tracks.rda",
               help="The file containing the cyclone tracks data  [default %default]"),
+  make_option("--gph_nc", type="character", default="reanalysis/gph.nc",
+              help="Path to GPH reanalysis [default %default]"),
   make_option("--outpath", type="character", default="figs/map_2011_",
               help="Path to save figures [default %default]")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
+
+# -------- Get & Manipulate Data -------
 
 load(opt$tracks)
 
@@ -41,7 +45,48 @@ names(rain) <- c('lon', 'lat', 'prcp_mm')
 rain <- rain[sample(1:nrow(rain), nrow(rain), replace = T, prob = rain$prcp_mm ^ 4)]
 rain[, lon := JamesR::Lon360to180(lon)]
 
-# plot the data
+# GPH
+gph_dates <- c(ymd('2011-04-16'), ymd('2011-04-25'))
+gph_lats <- c(20, 60)
+gph_lons <- c(-150, -50)
+nc <- nc_open(opt$gph_nc)
+nc_dates <- ymd_h('1900-01-01 0') + hours(nc$dim$time$vals)
+nc_lats <- nc$dim$latitude$vals
+nc_lons <- nc$dim$longitude$vals
+nc$levels <- nc$dim$level$val
+start_lon <- which.min(abs(nc_lons - gph_lons[1]))
+end_lon <- which.min(abs(nc_lons - gph_lons[2]))
+start_lat <- which.min(abs(nc_lats - gph_lats[2]))
+end_lat <- which.min(abs(nc_lats - gph_lats[1]))
+start_time <- which.min(abs(as_date(nc_dates) - gph_dates[1]))
+end_time <- which.min(abs(as_date(nc_dates) - gph_dates[2])) + 3 # adjust for hours
+gph <- ncvar_get(nc, varid = 'z', start = c(start_lon, start_lat, 1, start_time),
+                 count = 1 + c(end_lon-start_lon, end_lat-start_lat, 0, end_time-start_time))
+nc_close(nc)
+# melt  to tidy format
+gph_all <- vector('list', dim(gph)[2])
+for(i in 1:length(gph_all)){
+  x <- gph[, i, ] %>% as.data.table()
+  names(x) <- nc_dates[start_time:end_time] %>% as.character()
+  x[, lon := nc_lons[start_lon:end_lon]]
+  x <- melt(x, id.var = 'lon', variable.name = 'time', value.name = 'z600')
+  x[, lat := nc_lats[start_lat:end_lat][i]]
+  x[, time := as.character(time)]
+  x[, time := ymd_hms(time)]
+  gph_all[[i]] <- x
+}
+gph_all <- rbindlist(gph_all)
+gph_all[, date := as_date(time)]
+gph_all <- gph_all[, .(z600 = mean(z600)), by = .(date, lon, lat)]
+
+# climatology
+gph_clim <- fread('http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP-NCAR/.CDAS-1/.MONTHLY/.Intrinsic/.PressureLevel/.phi/T/%28Apriil%29VALUES/Y/%2820N%29%2870N%29RANGEEDGES/X/%28150W%29%2850W%29RANGEEDGES/P/%28600%29VALUES/yearly-climatology/gridtable.tsv', skip = 1)
+names(gph_clim) <- c('lon', 'lat', 'z600_c')
+gph_all <- merge(gph_all, gph_clim, by = c('lon', 'lat'))
+gph_all[, gph_a := z600/10 - z600_c]
+gph_all[, gph_a := gph_a - mean(gph_a)]
+
+# -------- Plotting -------
 world <- map_data('world') %>% as.data.table()
 storm_track <- 
   ggplot() +
@@ -60,3 +105,16 @@ storm_track <-
   theme(legend.position = c(0.1, 0.1), panel.grid = element_line(color = 'black')) +
   labs(fill = "(m/s)")
 storm_track %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'flooding'), pdf = T, width = 6, height = 6)
+
+# Composites
+gph_april_plt <-
+  ggplot(gph_all, aes(x = lon, y = lat)) +
+  geom_tile(aes(fill = gph_a)) +
+  geom_path(data = world, aes(x = long, y = lat, group = group), color = 'black') +
+  facet_wrap('date', nrow = 2) +
+  scale_fill_gradient2(low = "purple", high = "orange") +
+  theme_map(base_size = 9) + 
+  theme(legend.position = "bottom", panel.grid = element_line(color = 'black')) +
+  coord_quickmap(xlim = c(-150, -50), ylim = c(20, 70)) +
+  labs(fill = "600 hPa Geopotential Height Anomaly")
+gph_april_plt %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'gph_time'), pdf = T, width = 10, height = 4.25)

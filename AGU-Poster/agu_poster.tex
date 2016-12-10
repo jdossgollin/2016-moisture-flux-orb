@@ -6,8 +6,8 @@
 \usepackage[
   orientation=landscape,
   size=custom,
-  width=101.600,height=76.200,%size=a0, % paper size
-  scale=0.9 % font scale factor
+  width=152.400,height=76.200,%size=a0, % paper size
+  scale=1.1 % font scale factor
   ]{beamerposter}
 
 
@@ -98,45 +98,44 @@
   \begin{columns}[t]
 
     %-- Column 1 ---------------------------------------------------
-    \begin{column}{0.24\linewidth}
+    \begin{column}{0.18\linewidth}
 
-        % Example Block
         \input{blocks/big-picture.tex}
         \input{blocks/research-questions.tex}
-        \input{blocks/data-used.tex}
+        \input{blocks/thanks.tex}
 
     \end{column}%1
 
     %-- Column 2 ---------------------------------------------------
-    \begin{column}{0.22\linewidth}
-        \input{blocks/synoptic.tex}
-        \input{blocks/planetary.tex}
+    \begin{column}{0.18\linewidth}
+        \input{blocks/study-area.tex}
 
     \end{column}%2
 
     %-- Column 3 ---------------------------------------------------
-    \begin{column}{0.22\linewidth}
+    \begin{column}{0.18\linewidth}
+        \input{blocks/synoptic.tex}
+        \input{blocks/planetary.tex}
 
-      % Example Block
+    \end{column}%3
+
+    %-- Column 4 ---------------------------------------------------
+    \begin{column}{0.18\linewidth}
+
       \input{blocks/bayesian.tex}
 
     \end{column}%3
 
 
-    %-- Column 4 ---------------------------------------------------
-    \begin{column}{0.22\linewidth}
-
+    %-- Column 5 ---------------------------------------------------
+    \begin{column}{0.18\linewidth}
+        \input{blocks/conclusions.tex}
       %-- Block 4-2
       \begin{block}{References}
           \renewcommand*{\bibfont}{\footnotesize}
           \printbibliography[heading=none]
       \end{block}
 
-      \begin{block}{Acknowledgements}
-          Thanks to Donna Lee for sharing cyclone tracks.
-          Thanks to Yochanan Kushnir, Jimmy Booth, Casey Brown, Pierre Gentine, Linda Mearns, Katherine Schlef, Seth McGinnis, Melissa Bukovsky, and Rachel McCrary  for productive and insightful conversations.
-          This project is funded by the Department of Defense Strategic Environmental Research and Development Program grant SERDP\# 15 RC02-060.
-      \end{block}
 
     \end{column}%1
 

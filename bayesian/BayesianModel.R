@@ -72,7 +72,7 @@ mrg <- mrg[month >= opt$month1 | month <= opt$month2] %>% na.omit()
 
 # -------- Make Some Joint Distributional Plots Plots -------
 
-vars_plot <- c('dq', 'sst', 'low', 'high', 'dipole', 'weight', 'pna', 'amo', 'high_persist')
+vars_plot <- c('dq', 'sst', 'low', 'high', 'weight', 'pna', 'amo', 'high_persist')
 if(mkpdf){
   png(file = 'figs/joint_distribution_everything.png', width = 2000, height = 2000)
   mrg[, vars_plot, with = F] %>%
@@ -99,11 +99,11 @@ mrg <- mrg[, vars_plot, with = F]
 # rescale some of the parameters
 JCenter <- function(x){x - mean(x)}
 JRescale <- function(x){(x - mean(x)) / sd(x)}
-mrg[, ':='(dq = dq / 10000, sst = JRescale(sst), low = JRescale(low), high = JRescale(high), dipole = JRescale(dipole), high_persist = JRescale(high_persist), weight = JRescale(weight))]
+mrg[, ':='(dq = dq / 10000, sst = JRescale(sst - mean(sst)), low = JRescale(low), high = JRescale(high), high_persist = JRescale(high_persist), weight = JRescale(weight))]
 
 # choose the variables to include in the model
-local_factors <- mrg[, .(weight, high)]
-global_factors <- mrg[, .(pna, amo, sst)]
+local_factors <- mrg[, .(weight, high, sst)]
+global_factors <- mrg[, .(pna, amo, high_persist)]
 
 # fit the model
 stan_data <- list(
@@ -119,11 +119,17 @@ sink(file = opt$outtext); print(stan_fit); sink()
 
 # make some plots
 stan_caption <- paste0('The X variables: ', paste0(names(local_factors), collapse = ", "), '.   The Z variables: ', paste0(names(global_factors), collapse = ", "))
+length_taus <- ncol(local_factors)
+length_alpha <- ncol(local_factors) * ncol(global_factors) + ncol(local_factors)
+length_sigma <- 1
+length_betas <- ncol(local_factors) + 1
+hline_vec <- c(length_taus, length_alpha, length_sigma) %>% cumsum()
+
 post_plot <-
   plot(stan_fit, pars = c('beta0', 'beta', 'sigma', 'alpha0', 'alpha', 'tau')) +
   geom_vline(xintercept = 0) +
   theme_base(base_size = 10) +
-  geom_hline(yintercept = c(2, 8, 10, 11) + 0.5, color = 'gray') +
+  geom_hline(yintercept = hline_vec + 0.5, color = 'gray') +
   labs(caption = stan_caption, title = "Posterior Parameter Distributions", x = "", y = "")
 tplot <-
   traceplot(stan_fit) +
@@ -131,5 +137,5 @@ tplot <-
   labs(caption = stan_caption, title = "Chain Mixing in Posterior Simulations")
 
 # quick model checking -- this is not full posterior model checking
-post_plot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'posterior'), pdf = T, width = 8, height = 3.5)
+post_plot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'posterior'), pdf = T, width = 8, height = 4.5)
 tplot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'traceplot'), pdf = T, width = 10, height = 6)

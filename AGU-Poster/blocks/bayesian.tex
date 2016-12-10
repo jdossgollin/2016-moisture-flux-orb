@@ -1,4 +1,4 @@
-\begin{block}{Bayesian Estimation of Conditional Probabilities}
+\begin{block}{Bayesian Conditional Probability Estimation}
     To estimate the conditional probabilities of moisture flux conditional on synoptic features, and of synoptic features conditional on planetary-scale features, we build a Bayesian model which allows for simultaneous parameter estimation.
     This model takes requires three fundamental data blocks:
     \begin{enumerate}
@@ -11,14 +11,7 @@
         y_t & \sim \normal \qty(\beta_0 + X'_t \beta, \sigma^2) \quad t = 1, \ldots, T \label{eq:yX}\\
         X_{t,j} &\sim \normal \qty(\alpha_{0,j} + Z'_t \alpha_j, \tau_j^2) \quad j = 1, \ldots, p \label{eq:XZ}
     \end{align}
-    \texttt{SUBSET AS WE NARROW DOWN}
-    \begin{description}
-        \item[Moisture Flux] the summed moisture flux into the black box in \cref{fig:study-area}. Units are in \SI{10000}{\kilo\gram H_2O \per\meter\per\second}
-        \item[SSTs] Mean sea surface temperature over a box covering the Gulf of Mexico. Units are in \si{\kelvin} and have been rescaled to the standard normal.
-        \item[Dipole low] The geopotential height anomaly over the Eastern North America box defined in \citet{Farnham2016}. Units are in \si{\pascal} and have been rescaled to the standard normal.
-        \item[Dipole high] The geopotential height anomaly over the Western North Atlantic box defined in \citet{Farnham2016}. Units are in \si{\pascal} and have been rescaled to the standard normal.
-        \item[PNA] daily PNA index. Units are standardized for all seasons; the DJF distribution is not fully a standard normal.
-        \item[AMO] monthly AMO index. Units are standardized for all seasons; the DJF distribution is not fully a standard normal.
-        \item[weight] See \cref{sec:challenges}
-    \end{description}
+    To estimate the parameters $\beta_0, \beta, \sigma, \alpha_0, \alpha, \tau$ we use Hamiltonian Monte Carlo Markov Chain sampling using the Bayesian programming language Stan \cite{Carpenter2016}.
+    Because of the large amount of data available, we apply noninformative priors \cite{Gelman2014}.
+
 \end{block}
