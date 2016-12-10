@@ -11,7 +11,7 @@
 \usepackage{physics} % math notation and vectors
 \usepackage{wrapfig}
 
-
+\input{tikz_setup.tex}
 
 % code input
 \renewcommand{\scriptsize}{\fontsize{8pt}{8pt}\selectfont}
@@ -87,6 +87,12 @@ Ultimately, this will allow us to \emph{simulate the quantity of interest condit
 
 \citet{Lavers2016} show that extreme moisture flux is more predictable than extreme rainfall on the West Coast, and for this reason we use integrated water vapor transport into the Ohio River Basin
 
+\begin{figure}
+    \input{figure_tikz.tex}~\hfill
+    \includegraphics[width=0.6\textwidth]{flooding_2011_flooding}
+    \caption{(L) Causal hierarchy for extreme, regional floods. (R) Tracked cyclones (lines) and monthly-mean \SI{250}{\hecto\pascal} winds for April 2011, coinciding with severe flooding in the Ohio and Upper Mississippi River Basins.}
+    \label{fig:apr2011}
+\end{figure}
 
 \begin{figure}
     \centering

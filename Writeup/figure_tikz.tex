@@ -1,0 +1,11 @@
+\begin{tikzpicture}[node distance = 1.15cm, auto, font=\sffamily]
+	% Place nodes
+	\node [action] (boundary) {Boundary Forcings};
+	\node [object, below= of boundary] (circulation) {Circulation Anomaly};
+	\node [object, below=of circulation] (steering) {Moisture Steering};
+	\node [action, below= of steering] (flood) {High Flood Potential};
+	% Draw edges
+	\path [arrow] (boundary) -- (circulation);
+    \path [arrow] (circulation) -- (steering);
+    \path [arrow] (steering) -- (flood);
+\end{tikzpicture}

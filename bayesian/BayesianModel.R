@@ -17,6 +17,8 @@ option_list <- list(
               help="The file containing the temperature data  [default %default]"),
   make_option("--dipole", type="character", default="processed/dipole_ts.rda",
               help="The file containing the temperature data  [default %default]"),
+  make_option("--locfit", type="character", default="processed/locfit_model.rda",
+              help="The file containing the temperature data  [default %default]"),
   make_option("--month1", type="integer", default="12",
               help="Months to include in study [default %default]"),
   make_option("--month2", type="integer", default="2",
@@ -39,7 +41,7 @@ load(opt$amo)
 load(opt$pna)
 load(opt$temp)
 load(opt$dipole)
-source('functions/CycloneWeight.R')
+load(opt$locfit)
 
 # start with the 6-hour fields, degrade to daily, then add slower- timescale fields
 mrg <- merge(q_mean, temp, by = 'time')
@@ -50,7 +52,7 @@ mrg <- mrg[, lapply(.SD, mean), by = date, .SDcols = -'time']
 
 # get the closest cyclone each day
 cyclones[, date := as_date(date_time)]
-cyclones[, weight := CycloneWeight(lon, lat, method = 'parallelogram')]
+cyclones[, weight := GetWeight(lon, lat, model = locfit_model)]
 cyclones <- cyclones[, .SD[which.max(weight)], by = 'date']
 mrg <- merge(mrg, cyclones[, .(date, weight)], by = 'date')
 
@@ -97,7 +99,7 @@ mrg <- mrg[, vars_plot, with = F]
 # rescale some of the parameters
 JCenter <- function(x){x - mean(x)}
 JRescale <- function(x){(x - mean(x)) / sd(x)}
-mrg[, ':='(dq = dq / 10000, sst = JRescale(sst), low = JRescale(low), high = JRescale(high), dipole = JRescale(dipole), high_persist = JRescale(high_persist))]
+mrg[, ':='(dq = dq / 10000, sst = JRescale(sst), low = JRescale(low), high = JRescale(high), dipole = JRescale(dipole), high_persist = JRescale(high_persist), weight = JRescale(weight))]
 
 # choose the variables to include in the model
 local_factors <- mrg[, .(weight, high)]
@@ -121,6 +123,7 @@ post_plot <-
   plot(stan_fit, pars = c('beta0', 'beta', 'sigma', 'alpha0', 'alpha', 'tau')) +
   geom_vline(xintercept = 0) +
   theme_base(base_size = 10) +
+  geom_hline(yintercept = c(2, 8, 10, 11) + 0.5, color = 'gray') +
   labs(caption = stan_caption, title = "Posterior Parameter Distributions", x = "", y = "")
 tplot <-
   traceplot(stan_fit) +

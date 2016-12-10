@@ -1,0 +1,31 @@
+\usepackage{tikz}
+\usetikzlibrary{
+	shapes,
+    arrows,
+    shapes.geometric,
+    positioning,
+}
+
+% Define block styles
+\tikzstyle{object} = [
+	rectangle,
+    draw,
+    fill=blue!20,
+    text width=6cm,
+    text badly centered,
+    rounded corners]
+
+\tikzstyle{action} = [
+	rectangle,
+	draw,
+    text width=6cm,
+    text centered,
+    rounded corners]
+
+\tikzstyle{arrow} = [draw, -latex']
+\tikzstyle{noarrow} = [draw, dashed]
+
+% set consistent font size
+\tikzset{every picture/.style={font issue=\footnotesize},
+         font issue/.style={execute at begin picture={#1\selectfont}}
+         }

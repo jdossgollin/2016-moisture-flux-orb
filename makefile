@@ -73,10 +73,11 @@ figs/pna_cyclone_*.pdf	: scripts/PlotPNATracks.R	$(pna_rda) $(cyclone_rda) confi
 	Rscript $< --pna=$(pna_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/pna_cyclone_" --month1=$(SMONTH) --month2=$(EMONTH)
 figs/map_*.pdf	:	scripts/MapStations.R raw/BasinShapefile/FHP_Ohio_River_Basin_boundary.* config/moisturebox.mk
 	Rscript $< --shapefile="raw/BasinShapefile/FHP_Ohio_River_Basin_boundary"  --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/map_"
-
+figs/flooding_2011_*.pdf	:	scripts/PlotApril2011.R $(moisture_rda) $(cyclone_rda)
+	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --outpath="figs/flooding_2011_"
 
 ## figs	:	make the plots
-figs	:	figs/moisture_cyclone_*.pdf figs/pna_cyclone_*.pdf figs/map_*.pdf
+figs	:	figs/moisture_cyclone_*.pdf figs/pna_cyclone_*.pdf figs/map_*.pdf figs/flooding_2011_*.pdf
 
 #------ STATISTICAL ANALYSIS ------#
 

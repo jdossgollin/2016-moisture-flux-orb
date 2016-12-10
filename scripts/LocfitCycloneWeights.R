@@ -43,8 +43,8 @@ EarthDist <- function (long1, lat1, long2, lat2){
 
 # -------- Make the Locfit Model -------
 
-xl <- c(-105, -70)
-yl <- c(25, 60)
+xl <- c(-110, -40)
+yl <- c(25, 70)
 centroid <- c(-83.5, 42.0)
 
 load(opt$tracks)
@@ -67,8 +67,8 @@ idx <- sample(1:nrow(cyclones), N, replace = T, prob = cyclones[, prob])
 sampled <- cyclones[idx]
 
 # conduct a locfit with a hard threshold on distance
-sampled_close <- sampled[dist <= 2500]
-locfit_model <- locfit(data = sampled_close, dq ~ lon + lat, alpha = 0.25) 
+sampled_close <- sampled[dist <= 2500][lat >= 30]
+locfit_model <- locfit(data = sampled_close, dq ~ lon + lat, alpha = 0.5) 
 # plot(locfit_model, type = 'image')
 
 # ----- A Clear Function -----
@@ -77,7 +77,9 @@ GetWeight <- function(lon, lat, model = locfit_model){
   dt <- data.table(lon = lon, lat = lat)
   dt[, dist := EarthDist(long1 = lon, lat1 = lat, long2 = centroid[1], lat2 = centroid[2])]
   dt[, predicted := predict(locfit_model, as.matrix(dt[, .(lon, lat)]))]
-  dt[dist > 2500, predicted := 0] # hard threshold
+  # discount for distance
+  dt[, ':='(dx = abs(lon - centroid[1]), dy = abs(lat - centroid[2]))]
+  dt[, predicted := predicted * exp(-(dist / 1750)^2)] # hard threshold
   return(dt$predicted)
 }
 
@@ -92,27 +94,30 @@ test <- expand.grid(lon = seq(xl[1], xl[2], 0.5), lat = seq(yl[1], yl[2], 0.5)) 
 test[, norm := GetWeight(lon = lon, lat = lat, model = locfit_model)]
 test[, norm := norm / max(norm)]
 
-plot_comparison <-
-  ggplot(sampled, aes(x = lon, y = lat)) + 
-  geom_hex(binwidth = c(2.5, 2.5), aes(fill = ..density..)) +
-  geom_contour(data = test, aes(z = norm), color = 'black', breaks = seq(0.05, 0.95, 0.10)) +
-  geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
-  scale_fill_distiller(palette = "YlOrRd", name = "", breaks = NULL) +
-  geom_path(data = world, aes(group = group)) +
-  theme_map() + theme(legend.position = "left") +
+
+baseplot <- 
+  ggplot() +
+  theme_bw(base_size = 10) +
+  theme(legend.position = "left", panel.grid = element_line(color = 'black')) +
   coord_quickmap(xlim = xl, ylim = yl) +
+  scale_fill_distiller(palette = "Blues", name = "", breaks = NULL) +
+  labs(x = "", y = "")
+
+plot_comparison <-
+  baseplot +
+  geom_hex(data = sampled, binwidth = c(2.5, 2.5), aes(x = lon, y = lat, fill = ..density..)) +
+  geom_path(data = world, aes(x = lon, y = lat, group = group)) +
+  geom_contour(data = test, aes(x = lon, y = lat, z = norm), color = 'black') +
+  geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   labs(caption = "Color indicates density of observed cyclones, weighted by moisture flux; contours are from local regression")
-plot_comparison %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'predicted_observed'), pdf = T, width = 5, height = 8)
+plot_comparison %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'predicted_observed'), pdf = T, width = 9, height = 8)
 
 plot_model <-
-  ggplot(test, aes(x = lon, y = lat)) + 
-  geom_raster(aes(fill = norm)) +
-  geom_contour(aes(z = norm), color = 'black') +
-  scale_fill_distiller(palette = "YlOrRd", name = "") +
-  geom_path(data = world, aes(group = group)) +
-  theme_map() + theme(legend.position = "left") +
-  coord_quickmap(xlim = xl, ylim = yl)
-plot_model %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'predicted_only'), pdf = T, width = 5, height = 8)
+  baseplot +
+  geom_raster(data = test, aes(x = lon, y = lat, fill = norm)) +
+  geom_path(data = world, aes(x = lon, y = lat, group = group)) +
+  geom_contour(data = test, aes(x = lon, y = lat, z = norm), color = 'black')
+plot_model %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'predicted_only'), pdf = T, width = 9, height = 8)
 
 # ----- Save the Fit -----
 

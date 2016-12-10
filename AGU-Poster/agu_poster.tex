@@ -2,12 +2,14 @@
 \mode<presentation>{\usetheme{Lankton}}
 
 
+\setbeamertemplate{caption}[numbered] % number figs
 \usepackage[
   orientation=landscape,
-  width=40in,height=30in,%size=a0, % paper size
-  scale=1.025 % font scale factor
+  size=custom,
+  width=101.600,height=76.200,%size=a0, % paper size
+  scale=1.0 % font scale factor
   ]{beamerposter}
- \setbeamertemplate{caption}[numbered] % number figs
+
 
 % Graphics Path
 \usepackage{graphicx}
@@ -15,10 +17,15 @@
 
 % OTHER PACKAGE CALLS
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath,amsfonts,amssymb,pxfonts,eulervm,xspace}
+\usepackage{amsmath,amssymb,xspace}
 \usepackage{siunitx}
 \sisetup{round-mode = figures, round-precision = 3}
 \usepackage{cleveref}
+\input{tikz_setup.tex}
+
+\usepackage{xspace}
+\newcommand*{\eg}{e.g.\@\xspace}
+\newcommand*{\ie}{i.e.\@\xspace}
 
 % Use BibLaTeX
 \usepackage[
@@ -74,7 +81,6 @@
 
         % Example Block
         \input{blocks/big-picture.tex}
-        \input{blocks/framework.tex}
         \input{blocks/data-used.tex}
 
     \end{column}%1
