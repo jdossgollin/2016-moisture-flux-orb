@@ -59,7 +59,7 @@ $(cyclone_rda)	:	scripts/GetCycloneTracks.R config/dates.mk config/moisturebox.m
 	Rscript $< --trackpath="~/Documents/Work/Data/cyclone/"  --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(cyclone_rda)
 $(temp_rda)	:	scripts/ReadTemperature.R config/gmx_box.R config/dates.mk
 	Rscript $< --infile=$(tmp_nc) --gmx_box=config/gmx_box.R --outfile=$(temp_rda)
-$(locfit_rda)	:	scripts/LocfitCycloneWeights.R $(cyclone_rda) $(moisture_rda) config/moisturebox.mk
+$(locfit_rda) figs/locfit_weight_*.pdf	:	scripts/LocfitCycloneWeights.R $(cyclone_rda) $(moisture_rda) config/moisturebox.mk
 	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/locfit_weight_" --outfile=$(locfit_rda)
 
 ## processed	:	read and analyze data sets
@@ -71,13 +71,12 @@ figs/moisture_cyclone_*.pdf	:	scripts/PlotCycloneMoisture.R $(moisture_rda) $(cy
 	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --outpath="figs/moisture_cyclone_"  --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --month1=$(SMONTH) --month2=$(EMONTH)
 figs/pna_cyclone_*.pdf	: scripts/PlotPNATracks.R	$(pna_rda) $(cyclone_rda) config/moisturebox.mk
 	Rscript $< --pna=$(pna_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/pna_cyclone_" --month1=$(SMONTH) --month2=$(EMONTH)
-figs/map_*.pdf	:	scripts/MapStations.R raw/BasinShapefile/FHP_Ohio_River_Basin_boundary.* config/moisturebox.mk
+figs/map_*.pdf	:	scripts/MapStations.R raw/BasinShapefile/FHP_Ohio_River_Basin_boundary.* config/moisturebox.mk config/gmx_box.R
 	Rscript $< --shapefile="raw/BasinShapefile/FHP_Ohio_River_Basin_boundary"  --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/map_"
 figs/flooding_2011_*.pdf	:	scripts/PlotApril2011.R $(moisture_rda) $(cyclone_rda)
 	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --outpath="figs/flooding_2011_"
-
 ## figs	:	make the plots
-figs	:	figs/moisture_cyclone_*.pdf figs/pna_cyclone_*.pdf figs/map_*.pdf figs/flooding_2011_*.pdf
+figs	:	figs/moisture_cyclone_*.pdf figs/pna_cyclone_*.pdf figs/map_*.pdf figs/flooding_2011_*.pdf figs/locfit_weight_*.pdf
 
 #------ STATISTICAL ANALYSIS ------#
 

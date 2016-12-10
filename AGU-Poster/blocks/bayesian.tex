@@ -1,0 +1,24 @@
+\begin{block}{Bayesian Estimation of Conditional Probabilities}
+    To estimate the conditional probabilities of moisture flux conditional on synoptic features, and of synoptic features conditional on planetary-scale features, we build a Bayesian model which allows for simultaneous parameter estimation.
+    This model takes requires three fundamental data blocks:
+    \begin{enumerate}
+        \item $y_{N \times 1}$, the observed data (in this case, the moisture flux)
+        \item $X_{N \times p}$, the ``local'' factors that directly govern the $y$
+        \item $Z_{N \times k}$, the ``global'' factors that are hypothesized to govern the $X$
+    \end{enumerate}
+    Then, the model is formulated as
+    \begin{align}
+        y_t & \sim \normal \qty(\beta_0 + X'_t \beta, \sigma^2) \quad t = 1, \ldots, T \label{eq:yX}\\
+        X_{t,j} &\sim \normal \qty(\alpha_{0,j} + Z'_t \alpha_j, \tau_j^2) \quad j = 1, \ldots, p \label{eq:XZ}
+    \end{align}
+    \texttt{SUBSET AS WE NARROW DOWN}
+    \begin{description}
+        \item[Moisture Flux] the summed moisture flux into the black box in \cref{fig:study-area}. Units are in \SI{10000}{\kilo\gram H_2O \per\meter\per\second}
+        \item[SSTs] Mean sea surface temperature over a box covering the Gulf of Mexico. Units are in \si{\kelvin} and have been rescaled to the standard normal.
+        \item[Dipole low] The geopotential height anomaly over the Eastern North America box defined in \citet{Farnham2016}. Units are in \si{\pascal} and have been rescaled to the standard normal.
+        \item[Dipole high] The geopotential height anomaly over the Western North Atlantic box defined in \citet{Farnham2016}. Units are in \si{\pascal} and have been rescaled to the standard normal.
+        \item[PNA] daily PNA index. Units are standardized for all seasons; the DJF distribution is not fully a standard normal.
+        \item[AMO] monthly AMO index. Units are standardized for all seasons; the DJF distribution is not fully a standard normal.
+        \item[weight] See \cref{sec:challenges}
+    \end{description}
+\end{block}

@@ -1,0 +1,18 @@
+\begin{block}{Synoptic Modulation of Moisture Flux}
+    The location of extratropical cyclones modulates moisture flux into the Ohio River Basin.
+    To see this, for each time step we take the cyclone closest to the region and assign it to the observed moisture flux for that time step.
+    \Cref{fig:track-given-flux} (L) shows the results of a local regression \cite{Loader1999} fit to observed data.
+    The statistical model allows us to assign a score from zero to one for the (rescaled) expected moisture flux into the region, given an arbitrary cyclone location.
+
+    The right hand figure further demonstrates that cyclone tracks associated with extremely high flux follow highly similar trajectories.
+    \emph{The similarity of these trajectories suggests planetary-scale, steering mechanisms.}
+    These tracks also resemble those shown in \cref{fig:apr2011} that led to flooding in April 2011.
+    Other factors beyond cyclone position, including GMX temperature and the Western Atlantic Ridge (\cref{fig:study-area}), are included in our statistical model but are not plotted.
+    \begin{figure}
+        \includegraphics[width=0.45\columnwidth]{locfit_weight_predicted_observed}~
+        \includegraphics[width=0.5\columnwidth]{moisture_cyclone_tracks_given_flux}
+        \caption{(L) Expected moisture transport given cyclone location. Units are normalized from zero to one. Colors show observation and contours show the statistical model.
+                (R) Tracks of extratropical cyclones associated with (L) 70 random DJF days, and (R) the 70 days with highest DJF moisture transport. The ``Moisture'' box of \cref{fig:study-area} is shown for reference.}
+        \label{fig:track-given-flux}
+    \end{figure}
+\end{block}

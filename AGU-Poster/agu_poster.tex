@@ -7,7 +7,7 @@
   orientation=landscape,
   size=custom,
   width=101.600,height=76.200,%size=a0, % paper size
-  scale=1.0 % font scale factor
+  scale=0.9 % font scale factor
   ]{beamerposter}
 
 
@@ -17,15 +17,18 @@
 
 % OTHER PACKAGE CALLS
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb,xspace}
+\usepackage{amsmath,amssymb,physics} % math symbols
 \usepackage{siunitx}
 \sisetup{round-mode = figures, round-precision = 3}
-\usepackage{cleveref}
 \input{tikz_setup.tex}
 
+% eg and ie
 \usepackage{xspace}
 \newcommand*{\eg}{e.g.\@\xspace}
 \newcommand*{\ie}{i.e.\@\xspace}
+
+% this package loads last except for biblatex
+\usepackage{cleveref}
 
 % Use BibLaTeX
 \usepackage[
@@ -57,7 +60,7 @@
 %-- Header and footer information ----------------------------------
 \newcommand{\footleft}{\url{water.columbia.edu}}
 \newcommand{\footright}{\url{james.doss-gollin@columbia.edu}}
-\title{}
+\title{Global-Local Interactions Modulate Tropical Moisture Export to the Ohio River Basin}
 \author{James Doss-Gollin\inst{1,2} \quad David Farnham\inst{1,2} \quad Upmanu Lall\inst{1,2}}
 \institute
 {\inst{1} Columbia Water Center \quad \inst{2} Department of Earth and Environmental Engineering, Columbia University}
@@ -67,6 +70,24 @@
 
 %-- Main Document --------------------------------------------------
 \begin{document}
+
+% Statistical Macros
+\def\ci{\perp\!\!\!\perp}
+\def\ex{\mathbb{E}}
+\def\prob{\mathbb{P}}
+\def\ind{\mathbb{I}}
+\def\grad{\triangledown}
+\def\bigo{\mathcal{O}}
+\def\normal{\mathcal{N}}
+\def\bern{\text{Bernoulli}}
+\def\logit{\text{logit}}
+\def\binom{\text{Bin}}
+\def\poiss{\text{Poiss}}
+\def\cauchy{\text{Cauchy}}
+\def\sigmoid{\vb{\sigma}}
+\def\given{\big|}
+\def\stan{\texttt{Stan~}}
+
 %A little bit on why this region is interesting & our broad hypotheses (floods come from a hierarchy of causal mechanisms)
 %Establish that synoptic features modulate moisture flux -- I think this is already done with the maps that I have of flux given cyclone positions
 %Establish that "global" features (i.e. PNA, AMO) modulate these synoptic features -- again I think plots of cyclone tracks given different PNA phases is good
@@ -77,19 +98,19 @@
   \begin{columns}[t]
 
     %-- Column 1 ---------------------------------------------------
-    \begin{column}{0.22\linewidth}
+    \begin{column}{0.24\linewidth}
 
         % Example Block
         \input{blocks/big-picture.tex}
+        \input{blocks/research-questions.tex}
         \input{blocks/data-used.tex}
 
     \end{column}%1
 
     %-- Column 2 ---------------------------------------------------
     \begin{column}{0.22\linewidth}
-
-        % Example Block
-        \input{blocks/example.tex}
+        \input{blocks/synoptic.tex}
+        \input{blocks/planetary.tex}
 
     \end{column}%2
 
@@ -97,7 +118,7 @@
     \begin{column}{0.22\linewidth}
 
       % Example Block
-      \input{blocks/example.tex}
+      \input{blocks/bayesian.tex}
 
     \end{column}%3
 
@@ -112,7 +133,9 @@
       \end{block}
 
       \begin{block}{Acknowledgements}
-          Thanks to Yochanan Kushnir, Jimmy Booth, Donna Lee
+          Thanks to Donna Lee for sharing cyclone tracks.
+          Thanks to Yochanan Kushnir, Jimmy Booth, Casey Brown, Pierre Gentine, Linda Mearns, Katherine Schlef, Seth McGinnis, Melissa Bukovsky, and Rachel McCrary  for productive and insightful conversations.
+          This project is funded by the Department of Defense Strategic Environmental Research and Development Program grant SERDP\# 15 RC02-060.
       \end{block}
 
     \end{column}%1

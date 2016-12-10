@@ -32,7 +32,7 @@ centroid <- c(mean(c(opt$lonmin, opt$lonmax)), opt$latmax)
 dist_max <- 25
 xl <- c(centroid[1] - dist_max - 5, centroid[1] + dist_max + 5)
 yl <- c(centroid[2] - dist_max - 5, centroid[2] + dist_max + 5)
-bsize <- 9
+bsize <- 11
 
 load(opt$tracks)
 load(opt$flux)
@@ -81,10 +81,10 @@ by_cyclone <- tracks[centroid_distance <= dist_max][order(stormnum)][, .(dq_max 
 
 # strongest cyclones & equal bootstrap sample
 by_cyclone[, rank := rank(-dq_max, ties.method = "random"), by = season]
-strong_cyclone_idx <- by_cyclone[rank <= 100, stormnum]
+strong_cyclone_idx <- by_cyclone[rank <= 70, stormnum]
 strong_cyclones <-  tracks[stormnum %in% strong_cyclone_idx]
 by_cyclone[, r_idx := sample(1:.N), by = season]
-random_cyclone_idx <- by_cyclone[r_idx <= 100, stormnum]
+random_cyclone_idx <- by_cyclone[r_idx <= 70, stormnum]
 random_cyclones <- tracks[stormnum %in% random_cyclone_idx]
 strong_cyclones[, type := 'High Flux']
 random_cyclones[, type := 'Bootstrap']
@@ -100,4 +100,4 @@ plt_track_conditional <-
   theme_map(base_size = bsize) +
   coord_quickmap(xlim = xl, ylim = yl) +
   theme(legend.position = "bottom")
-plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 9, height = 5)
+plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 7, height = 5.5)
