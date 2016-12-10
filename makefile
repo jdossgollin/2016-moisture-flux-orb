@@ -41,6 +41,7 @@ reanalysis	: $(moisture_nc) $(gph_nc) $(tmp_nc)
 
 dipole_ts=processed/dipole_ts.rda
 pna_rda=processed/pna.rda
+nao_rda=processed/nao.rda
 temp_rda=processed/temperature.rda
 moisture_rda=processed/moisture.rda
 cyclone_rda=processed/cyclone_tracks.rda
@@ -51,6 +52,8 @@ $(dipole_ts)	:	scripts/GetDipoleTS.R $(gph_nc)
 	Rscript $< --gphnc=$(gph_nc) --outfile=$(dipole_ts)
 $(pna_rda)	:	scripts/GetPNA.R config/dates.mk
 	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --lag=30 --outfile=$(pna_rda)
+$(nao_rda)	:	scripts/GetNAO.R config/dates.mk
+	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --lag=90 --outfile=$(nao_rda)
 $(amo_rda)	:	scripts/GetAMO.R config/dates.mk
 	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(amo_rda)
 $(moisture_rda)	:	scripts/ReadMoistureFlux.R $(moisture_nc)
@@ -63,7 +66,7 @@ $(locfit_rda) figs/locfit_weight_*.pdf	:	scripts/LocfitCycloneWeights.R $(cyclon
 	Rscript $< --flux=$(moisture_rda) --tracks=$(cyclone_rda) --latmin=$(MBSOUTH) --latmax=$(MBNORTH) --lonmin=$(MBWEST) --lonmax=$(MBEAST) --outpath="figs/locfit_weight_" --outfile=$(locfit_rda)
 
 ## processed	:	read and analyze data sets
-processed	:  reanalysis $(dipole_ts) $(pna_rda) $(amo_rda) $(moisture_rda) $(cyclone_rda) $(temp_rda) $(locfit_rda)
+processed	:  reanalysis $(dipole_ts) $(pna_rda) $(nao_rda) $(amo_rda) $(moisture_rda) $(cyclone_rda) $(temp_rda) $(locfit_rda)
 
 #------ MAKE PLOTS ------#
 
