@@ -97,7 +97,8 @@ plt_track_conditional <-
   facet_wrap('type') +
   scale_color_distiller(palette = "YlOrRd", direction = 1) +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
-  theme_map(base_size = bsize) +
-  coord_quickmap(xlim = xl, ylim = yl) +
-  theme(legend.position = "bottom")
-plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 7, height = 5.5)
+  theme_bw(base_size = bsize) +
+  theme(panel.grid = element_line(color = 'black'), legend.position = "bottom") +
+  labs(x = "", y = "") +
+  coord_map("albers", lat0 = 25, lat1 = 45, xlim = c(-120, -40), ylim = c(20, 70))
+plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 10, height = 5.5)

@@ -32,7 +32,7 @@ centroid <- c(mean(c(opt$lonmin, opt$lonmax)), opt$latmax)
 dist_max <- 30
 xl <- c(centroid[1] - dist_max - 5, centroid[1] + dist_max + 5)
 yl <- c(centroid[2] - dist_max - 5, centroid[2] + dist_max + 5)
-bsize <- 9
+bsize <- 11
 
 load(opt$tracks)
 load(opt$pna)
@@ -61,19 +61,20 @@ cyclone_dist <- cyclones[, .(min_dist = min(centroid_distance)), by = stormnum]
 cyclones_orb <- cyclones[stormnum %in% cyclone_dist[min_dist <= dist_max, stormnum]]
 cyclones_orb <- na.omit(cyclones_orb)
 
-idx_orb_plt <- cyclones_orb[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]][, .(stormnum = sample(stormnum, 250), replace = F), by = pna_cat]
+idx_orb_plt <- cyclones_orb[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]][, .(stormnum = sample(stormnum, 150), replace = F), by = pna_cat]
 plt_tracks_pna <-
-  cyclones_orb[stormnum %in% idx_orb_plt$stormnum][lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]] %>%
+  cyclones_orb[stormnum %in% idx_orb_plt$stormnum][pna_cat %in% c(-1, 1)][, pna_cat := ifelse(pna_cat ==1, 'Positive', 'Negative')] %>%
   ggplot(aes(x = lon, y = lat)) +
   geom_polygon(data = world, aes(group = group), color = 'gray', fill = 'gray', alpha = 0.5) +
   geom_path(aes(group = stormnum, color = intensity)) +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   scale_color_distiller(palette = "YlOrRd", direction = 1) +
-  theme_map(base_size = bsize) +
-  coord_quickmap(xlim = xl, ylim = yl) +
-  theme(legend.position = "bottom") +
-  facet_wrap('pna_cat')
-plt_tracks_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'map_plot'), pdf = T, height = 5, width = 10)
+  facet_wrap('pna_cat') +
+  theme_bw(base_size = bsize) +
+  theme(panel.grid = element_line(color = 'black'), legend.position = c(0.95, 0.25)) +
+  labs(x = "", y = "") +
+  coord_map("albers", lat0 = 25, lat1 = 45, xlim = c(-120, -40), ylim = c(20, 70))
+plt_tracks_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'map_plot'), pdf = T, height = 4.25, width = 10)
 
 plt_heatmap_pna <-
   cyclones_orb[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]] %>%
@@ -82,8 +83,9 @@ plt_heatmap_pna <-
   geom_hex(binwidth = c(2.5, 2.5), alpha = 0.8) +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   scale_fill_distiller(palette = "YlOrRd", direction = 1) +
-  theme_map(base_size = bsize) +
-  coord_quickmap(xlim = xl, ylim = yl) +
-  theme(legend.position = "bottom") +
-  facet_wrap('pna_cat')
+  facet_wrap('pna_cat') +
+  theme_bw(base_size = bsize) +
+  theme(panel.grid = element_line(color = 'black'), legend.position = "bottom") +
+  labs(x = "", y = "") +
+  coord_quickmap(xlim = c(-120, -40), ylim = c(20, 70))
 plt_heatmap_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'heatmap'), pdf = T, height = 5, width = 10)

@@ -52,7 +52,8 @@ load(opt$flux)
 q_mean[, dq := dq / 1e4] # new units
 
 # select the closest cyclone each day, DJF only
-cyclones <- cyclones[season == 'DJF', .(lon, lat, date_time)]
+cyclones <- cyclones[season == 'DJF', .(lon, lat, date_time, intensity)]
+cyclones <- cyclones[intensity >= quantile(intensity, 1/3)]
 cyclones[, dist := EarthDist(long1 = lon, lat1 = lat, long2 = centroid[1], lat2 = centroid[2])]
 cyclones <- cyclones[, .SD[which.min(dist)], by = date_time]
 

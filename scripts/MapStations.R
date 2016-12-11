@@ -57,14 +57,17 @@ station_map <-
   geom_polygon(aes(x = long,y = lat), fill = "gray", data = basin_points, alpha = 0.6, color = 'gray') +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax, color = "Moisture"), fill = NA, size = w) +
   geom_text(aes(x = mean(c(opt$lonmin, opt$lonmax)), y = mean(c(opt$latmin, opt$latmax)), label = 'Moisture', color = 'Moisture')) +
-  geom_rect(aes(xmin = dipole$high_x[1], xmax = dipole$high_x[2], ymin = dipole$high_y[1], ymax = dipole$high_y[2], color = "W. Atl. Ridge"), fill = NA, size = w) +
-  geom_text(aes(x = mean(dipole$high_x), y = mean(dipole$high_y), label = 'W. Atl. Ridge', color = 'W. Atl. Ridge')) + 
+  geom_rect(aes(xmin = dipole$high_x[1], xmax = dipole$high_x[2], ymin = dipole$high_y[1], ymax = dipole$high_y[2], color = "W. Atl. High"), fill = NA, size = w) +
+  geom_text(aes(x = mean(dipole$high_x), y = mean(dipole$high_y), label = 'W. Atl. Ridge', color = 'W. Atl. High')) + 
+  geom_rect(aes(xmin = dipole$low_x[1], xmax = dipole$low_x[2], ymin = dipole$low_y[1], ymax = dipole$low_y[2], color = "East U.S. Low"), fill = NA, size = w) +
+  geom_text(aes(x = mean(dipole$low_x), y = mean(dipole$low_y), label = 'East U.S. Low', color = 'East U.S. Low')) + 
   geom_rect(aes(xmin = gmx$lon[1], xmax = gmx$lon[2], ymin = gmx$lat[1], ymax = gmx$lat[2], color = "GMX"), fill = NA, size = w) +
     geom_text(aes(x = mean(gmx$lon), y = mean(gmx$lat), label = 'GMX', color = 'GMX')) +
   theme_bw(base_size = 10) +
+  scale_color_brewer(palette = "Set1") +
   theme(panel.grid = element_line(color = 'black'), legend.position = "bottom") +
   coord_map("albers", lat0 = 25, lat1 = 45, xlim = c(lonmin, lonmax), ylim = c(latmin, latmax)) +
-  labs(x = "Degrees East", y = "Degrees North") +
+  labs(x = "", y = "") +
   guides(color = FALSE)
 
 station_map %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'inset'), pdf = T, width = 5, height = 3.75)
