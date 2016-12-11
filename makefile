@@ -53,7 +53,7 @@ $(dipole_ts)	:	scripts/GetDipoleTS.R $(gph_nc)
 $(pna_rda)	:	scripts/GetPNA.R config/dates.mk
 	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --lag=30 --outfile=$(pna_rda)
 $(nao_rda)	:	scripts/GetNAO.R config/dates.mk
-	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --lag=90 --outfile=$(nao_rda)
+	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --lag=30 --outfile=$(nao_rda)
 $(amo_rda)	:	scripts/GetAMO.R config/dates.mk
 	Rscript $< --syear=$(SYEAR) --eyear=$(EYEAR) --outfile=$(amo_rda)
 $(moisture_rda)	:	scripts/ReadMoistureFlux.R $(moisture_nc)

@@ -144,6 +144,8 @@ tplot <-
 post_plot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'posterior'), pdf = T, width = 8, height = 4)
 tplot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'traceplot'), pdf = T, width = 10, height = 6)
 
+
+
 # -------- Build a Model w/o Intermediate Steps -------
 stan_data2 <- list(
   N = nrow(mrg),

@@ -1,11 +1,13 @@
-\begin{tikzpicture}[node distance = 1.5cm, auto, font=\sffamily]
+\begin{tikzpicture}[node distance = 1.15cm, auto, font=\sffamily]
 	% Place nodes
 	\node [action] (boundary) {Boundary Forcings};
-	\node [object, below= of boundary] (circulation) {Circulation Anomaly\\ (\ie AMO)};
-	\node [object, below=of circulation] (steering) {Moisture Steering\\ (\ie Cyclone)};
-	\node [action, below= of steering] (flood) {High Flood Potential};
+	\node [object, below= of boundary] (circulation) {Hemispheric-Scale Circulation / Planetary Waves};
+	\node [object, below=of circulation] (steering) {Synoptic Circulation Patterns};
+	\node [object, below=of steering] (moisture) {Moisture Transport \& Convergence};
+	\node [action, below= of moisture] (flood) {Flood Potential};
 	% Draw edges
 	\path [arrow] (boundary) -- (circulation);
     \path [arrow] (circulation) -- (steering);
-    \path [arrow] (steering) -- (flood);
+    \path [arrow] (steering) -- (moisture);
+	\path [arrow] (moisture) -- (flood);
 \end{tikzpicture}
