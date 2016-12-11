@@ -6,8 +6,8 @@
 \usepackage[
   orientation=landscape,
   size=custom,
-  width=152.400,height=76.200,%size=a0, % paper size
-  scale=1.2 % font scale factor
+  width=152.400,height=91.400,%size=a0, % paper size
+  scale=1.3 % font scale factor
   ]{beamerposter}
 
 
@@ -98,7 +98,7 @@
   \begin{columns}[t]
 
     %-- Column 1 ---------------------------------------------------
-    \begin{column}{0.18\linewidth}
+    \begin{column}{0.2\linewidth}
 
         \input{blocks/big-picture.tex}
         \input{blocks/research-questions.tex}
@@ -120,7 +120,7 @@
     \end{column}%3
 
     %-- Column 4 ---------------------------------------------------
-    \begin{column}{0.18\linewidth}
+    \begin{column}{0.2\linewidth}
 
       \input{blocks/bayesian.tex}
       \input{blocks/model-inference.tex}
@@ -132,12 +132,11 @@
     \begin{column}{0.18\linewidth}
         \input{blocks/conclusions.tex}
         \input{blocks/next-steps.tex}
-      %-- Block 4-2
-      \begin{block}{References}
-          \renewcommand*{\bibfont}{\footnotesize}
-          \printbibliography[heading=none]
-      \end{block}
-      \input{blocks/thanks.tex}
+        \input{blocks/thanks.tex}
+        \begin{block}{References}
+            \renewcommand*{\bibfont}{\footnotesize}
+            \printbibliography[heading=none]
+        \end{block}
 
 
     \end{column}%1

@@ -73,8 +73,8 @@ plt_tracks_pna <-
   theme_bw(base_size = bsize) +
   theme(panel.grid = element_line(color = 'black'), legend.position = c(0.95, 0.25)) +
   labs(x = "", y = "") +
-  coord_map("albers", lat0 = 25, lat1 = 45, xlim = c(-120, -40), ylim = c(20, 70))
-plt_tracks_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'map_plot'), pdf = T, height = 4.25, width = 10)
+  coord_map("albers", lat0 = 30, lat1 = 60, xlim = c(-110, -45), ylim = c(20, 80))
+plt_tracks_pna %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'map_plot'), pdf = T, height = 6, width = 10)
 
 plt_heatmap_pna <-
   cyclones_orb[lon >= xl[1] & lon <= xl[2] & lat >= yl[1] & lat <= yl[2]] %>%

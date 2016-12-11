@@ -36,5 +36,6 @@ nao <- nao[, .(date, nao)]
 
 # add a n-day lag term
 nao[, nao_lag := stats::filter(nao, filter = rep(1 / opt$lag, opt$lag), sides = 1)]
+nao[, nao_lag := as.numeric(nao_lag)]
 
 save(nao, file = opt$outfile)

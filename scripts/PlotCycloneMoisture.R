@@ -98,7 +98,7 @@ plt_track_conditional <-
   scale_color_distiller(palette = "YlOrRd", direction = 1) +
   geom_rect(aes(xmin = opt$lonmin, xmax = opt$lonmax, ymin = opt$latmin, ymax = opt$latmax), fill = NA, color =  'black') +
   theme_bw(base_size = bsize) +
-  theme(panel.grid = element_line(color = 'black'), legend.position = "bottom") +
+  theme(panel.grid = element_line(color = 'black'), legend.position = c(0.95, 0.25)) +
   labs(x = "", y = "") +
-  coord_map("albers", lat0 = 25, lat1 = 45, xlim = c(-120, -40), ylim = c(20, 70))
-plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 10, height = 5.5)
+  coord_map("albers", lat0 = 30, lat1 = 60, xlim = c(-110, -45), ylim = c(20, 80))
+plt_track_conditional %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'tracks_given_flux'), pdf = T, width = 10, height = 6)

@@ -1,15 +1,15 @@
 \begin{block}{Probability Model}
     To estimate the  probabilities of moisture flux conditional on synoptic features, and of synoptic features conditional on planetary-scale features, we build a two-level Bayesian model.
-    This model takes requires three fundamental data blocks:
+    This model takes three fundamental data blocks:
     \begin{enumerate}
         \item $y_{N \times 1}$, in this case the moisture flux
-        \item $X_{N \times p}$, the ``local'' factors, in this case the GMX SSTs, W. Atl. Ridge, and Eastern U.S. Low
+        \item $X_{N \times J}$, the ``local'' factors, in this case the GMX SSTs, W. Atl. Ridge, and Eastern U.S. Low
         \item $Z_{N \times k}$, the ``global'' factors, in this case the PNA and NAO
     \end{enumerate}
     Then, the model is formulated as
     \begin{align}
-        \log \qty(y_t) & \sim \normal \qty(\beta_0 + X'_t \beta, \sigma^2) \quad t = 1, \ldots, T \label{eq:yX}\\
-        X_{t,j} &\sim \normal \qty(\alpha_{0,j} + Z'_t \alpha_j, \tau_j^2) \quad j = 1, \ldots, p \label{eq:XZ}
+        y_t & \sim \normal \qty(\beta_0 + X'_t \beta, \sigma^2) \qqtext{for} t = 1, \ldots, T \label{eq:yX}\\
+        X_{t,j} &\sim \normal \qty(\alpha_{0,j} + Z'_t \alpha_j, \tau_j^2) \qqtext{for} j = 1, \ldots, J \label{eq:XZ}
     \end{align}
     To estimate the parameters $\beta_0, \beta, \sigma, \alpha_0, \alpha, \tau$ we use Hamiltonian Monte Carlo Markov Chain sampling using the Bayesian programming language Stan \cite{Carpenter2016}, applying noninformative priors \cite{Gelman2014}.
 \end{block}

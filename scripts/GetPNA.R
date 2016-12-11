@@ -36,5 +36,5 @@ pna <- pna[, .(date, pna)]
 
 # add a n-day lag term
 pna[, pna_lag := stats::filter(pna, filter = rep(1 / opt$lag, opt$lag), sides = 1)]
-
+pna[, pna_lag := as.numeric(pna_lag)]
 save(pna, file = opt$outfile)
