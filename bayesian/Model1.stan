@@ -24,6 +24,6 @@ model{
     X[, j] ~ normal(alpha0[j] + Z * alpha[, j], tau[j]);
   }
   // priors
-  tau ~ normal(0, 10);
-  sigma ~ normal(0, 10);
+  tau ~ student_t(3, 0, 1);
+  sigma ~ student_t(3, 0, 1);
 }
