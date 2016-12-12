@@ -76,7 +76,7 @@ mrg <- mrg[month >= opt$month1 | month <= opt$month2] %>% na.omit()
 # rescale some of the parameters
 JCenter <- function(x){x - mean(x)}
 JRescale <- function(x){(x - mean(x)) / sd(x)}
-mrg[, ':='(dq = dq / 10000, sst = JRescale(sst - mean(sst)), high = JRescale(high), low = JRescale(low))]
+mrg[, ':='(dq = dq / 10000, sst = JRescale(sst - mean(sst)), high = JRescale(high), low = JRescale(low), nao = JRescale(nao), pna = JRescale(pna))]
 mrg[, dq_adj := log(dq - min(dq))]
 
 # -------- Make Some Joint Distributional Plots Plots -------
@@ -146,63 +146,63 @@ tplot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'traceplot'), pdf = T, width 
 
 
 
-# -------- Build a Model w/o Intermediate Steps -------
-stan_data2 <- list(
-  N = nrow(mrg),
-  k = ncol(global_factors),
-  Z = as.matrix(global_factors),
-  y = mrg$dq
-)
-stan_fit_alternate <- stan(file = 'bayesian/Model2.stan', data = stan_data2, chains = 1)
-traceplot(stan_fit_alternate) + theme_base()
-plot(stan_fit_alternate) + theme_base()
-
-# -------- Simulate an Event from Both -------
-
-full_extract <- extract(stan_fit)
-reduced_extract <- extract(stan_fit_alternate)
-
-nsim <- 2500
-subset <- mrg[nao > quantile(nao, 0.5) & pna > quantile(pna, 0.5), .(pna, nao, dq)]
-simulated <- subset[sample(1:nrow(subset), nsim, replace = T)]
-y_true <- simulated[, dq]
-Z_sim <- simulated[, .(pna, nao)]
-
-# simulate from reduced model
-reduced_y <- rep(NA, nsim)
-for(i in 1:nsim){
-  par_idx <- sample(1:length(reduced_extract$beta0), 1)
-  beta0_i <- reduced_extract$beta0[par_idx]
-  beta_i <- reduced_extract$beta[par_idx, ]
-  sigma_i <- reduced_extract$sigma[par_idx]
-  z_i <- Z_sim[i, .(pna, nao)] %>% as.matrix()
-  reduced_y[i] <- rnorm(1, mean = beta0_i + beta_i * z_i, sd = sigma_i)
-}
-
-full_y <- rep(NA, nsim)  
-for(i in 1:nsim){
-  par_idx <- sample(1:length(reduced_extract$beta0), 1)
-  beta0_i <- full_extract$beta0[par_idx]
-  beta_i <- full_extract$beta[par_idx, ]
-  sigma_i <- full_extract$sigma[par_idx]
-  alpha0_i <- full_extract$alpha0[par_idx, ]
-  alpha_i <- full_extract$alpha[par_idx, , ]
-  tau_i <- full_extract$tau[par_idx, ]
-  z_i <- Z_sim[i] %>% as.matrix()
-  Xhat_i <- rnorm(length(alpha0_i), mean = alpha0_i + z_i %*% alpha_i, sd = tau_i)
-  full_y[i] <- rnorm(1, mean = beta0_i + Xhat_i %*% beta_i, sd = sigma_i)
-}
-
-par(mfrow = c(1, 2))
-plot(reduced_y, y_true, main = "Reduced"); abline(a=0, b = 1, col=4)
-plot(full_y, y_true, main = "Full"); abline(a=0, b = 1, col=4)
-par(mfrow = c(1,1))
-
-lm(y_true ~ reduced_y) %>% summary()
-lm(y_true ~ full_y) %>% summary()
-
-par(mfrow = c(3, 1))
-hist(y_true, breaks = seq(-5, 10, 0.5), main = "Observed")
-hist(full_y, breaks = seq(-5, 10, 0.5), main = "Full")
-hist(reduced_y, breaks = seq(-5, 10, 0.5), main = "Reduced")
-par(mfrow = c(1,1))
+# # -------- Build a Model w/o Intermediate Steps -------
+# stan_data2 <- list(
+#   N = nrow(mrg),
+#   k = ncol(global_factors),
+#   Z = as.matrix(global_factors),
+#   y = mrg$dq
+# )
+# stan_fit_alternate <- stan(file = 'bayesian/Model2.stan', data = stan_data2, chains = 1)
+# traceplot(stan_fit_alternate) + theme_base()
+# plot(stan_fit_alternate) + theme_base()
+# 
+# # -------- Simulate an Event from Both -------
+# 
+# full_extract <- extract(stan_fit)
+# reduced_extract <- extract(stan_fit_alternate)
+# 
+# nsim <- 2500
+# subset <- mrg[nao > quantile(nao, 0.5) & pna > quantile(pna, 0.5), .(pna, nao, dq)]
+# simulated <- subset[sample(1:nrow(subset), nsim, replace = T)]
+# y_true <- simulated[, dq]
+# Z_sim <- simulated[, .(pna, nao)]
+# 
+# # simulate from reduced model
+# reduced_y <- rep(NA, nsim)
+# for(i in 1:nsim){
+#   par_idx <- sample(1:length(reduced_extract$beta0), 1)
+#   beta0_i <- reduced_extract$beta0[par_idx]
+#   beta_i <- reduced_extract$beta[par_idx, ]
+#   sigma_i <- reduced_extract$sigma[par_idx]
+#   z_i <- Z_sim[i, .(pna, nao)] %>% as.matrix()
+#   reduced_y[i] <- rnorm(1, mean = beta0_i + beta_i * z_i, sd = sigma_i)
+# }
+# 
+# full_y <- rep(NA, nsim)  
+# for(i in 1:nsim){
+#   par_idx <- sample(1:length(reduced_extract$beta0), 1)
+#   beta0_i <- full_extract$beta0[par_idx]
+#   beta_i <- full_extract$beta[par_idx, ]
+#   sigma_i <- full_extract$sigma[par_idx]
+#   alpha0_i <- full_extract$alpha0[par_idx, ]
+#   alpha_i <- full_extract$alpha[par_idx, , ]
+#   tau_i <- full_extract$tau[par_idx, ]
+#   z_i <- Z_sim[i] %>% as.matrix()
+#   Xhat_i <- rnorm(length(alpha0_i), mean = alpha0_i + z_i %*% alpha_i, sd = tau_i)
+#   full_y[i] <- rnorm(1, mean = beta0_i + Xhat_i %*% beta_i, sd = sigma_i)
+# }
+# 
+# par(mfrow = c(1, 2))
+# plot(reduced_y, y_true, main = "Reduced"); abline(a=0, b = 1, col=4)
+# plot(full_y, y_true, main = "Full"); abline(a=0, b = 1, col=4)
+# par(mfrow = c(1,1))
+# 
+# lm(y_true ~ reduced_y) %>% summary()
+# lm(y_true ~ full_y) %>% summary()
+# 
+# par(mfrow = c(3, 1))
+# hist(y_true, breaks = seq(-5, 10, 0.5), main = "Observed")
+# hist(full_y, breaks = seq(-5, 10, 0.5), main = "Full")
+# hist(reduced_y, breaks = seq(-5, 10, 0.5), main = "Reduced")
+# par(mfrow = c(1,1))
