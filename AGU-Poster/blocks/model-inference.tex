@@ -5,9 +5,9 @@
         \caption{\num{4000} draws from posterior distribution specified by \cref{eq:yX,eq:XZ}.}
         \label{fig:posterior}
     \end{figure}
-    Interpreting the results of \cref{fig:posterior} requires noting the ordering of the $X$ and $Z$ variables, given in the plot's bottom-right corner.
-    For example, \begin{verbatim}alpha[1,3]\end{verbatim} gives the coefficient of $Z_{1}$ (PNA) on $X_3$ (Gulf of Mexico SSTs).
+    Interpreting the results of \cref{fig:posterior} requires noting the ordering of the $X$ and $Z$ variables; for example, \texttt{alpha[1,3]} gives the coefficient of $Z_{1}$ (PNA) on $X_3$ (GMX SSTs).
     In the first (local-moisture) step, we note that the effect of the dynamical $X$ variables (the low and high height anomalies; $\beta_1, \beta_2$) is far greater than the effect of the thermodynamic variable (the GMX SSTs; $\beta_3$).
+    This comparison is valid because all $X$ and $Z$ have been standardized.
     Other variables should be explored before drawing more general conclusions.
     It is also of note that the magnitude of the effect of increasing the W. Atlantic High ($\beta_1$) is somewhat larger than increasing the magnigude of the Eastern U.S. Low $(\beta_2)$.
     In the second (global-local) step, we see that a positive PNA provides feedbacks that both support and inhibit moisture flux to the Ohio River Basin, suppressing the high and GMX SSTs ($\alpha_{1,1}, \alpha_{1,3}$) but enhancing the low ($\alpha_{1,2}$) in the positive phase.

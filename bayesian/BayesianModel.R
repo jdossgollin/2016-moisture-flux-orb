@@ -141,7 +141,7 @@ tplot <-
   labs(caption = stan_caption, title = "Chain Mixing in Posterior Simulations")
 
 # print
-post_plot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'posterior'), pdf = T, width = 8, height = 4)
+post_plot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'posterior'), pdf = T, width = 8, height = 5)
 tplot %>% JamesR::EZPrint(fn = paste0(opt$outpath, 'traceplot'), pdf = T, width = 10, height = 6)
 
 
