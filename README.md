@@ -3,7 +3,7 @@
 ## Goal
 
 - Study of moisture flux into the Ohio River Basin
-- more to come here
+- this work was presented at AGU Fall Meeting 2016 but never written up or published
 
 ## Requirements
 
